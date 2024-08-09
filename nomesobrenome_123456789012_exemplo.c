@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
         char instrucao[30] = {0};
         // Declarando operandos
         uint8_t z = 0, x = 0, i = 0, y = 0;
-        uint32_t pc = 0, xyl = 0;
+        uint32_t pc = 0, xyl = 0, aux = 0;
 
         // Carregando a instrucao de 32 bits (4 bytes) da memoria indexada pelo PC
         // (R29) no registrador IR (R28) E feita a leitura redundante com MEM8 e
@@ -575,18 +575,20 @@ int main(int argc, char *argv[])
             x = (R[28] >> 16) & 0b11111; // Obtém o registrador x
             y = (R[28] >> 11) & 0b11111; // Obtém o registrador y
 
-            // Execução da operação de comparação
-            CMP = R[x] - R[y];
+            uint64_t temp_x = (uint64_t)R[x];
+            uint64_t temp_y = (uint64_t)R[y];
+            uint64_t temp_cmp = temp_x - temp_y;
+            CMP = (int)temp_cmp;
 
-            // Definindo os campos afetados
             ZN = (CMP == 0);
-            SN = (CMP < 0);
+            SN = (CMP >> 31) & 1;
+            OV = ((temp_x >> 31) != (temp_y >> 31)) && ((temp_x >> 31) != (temp_cmp >> 31));
+            CY = (temp_cmp >> 32) & 1;
 
-            // Formatação da instrução
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
+
             sprintf(instrucao, "cmp r%u,r%u", x, y);
-
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%u-R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, x, y, CMP, (ZN << 1) | (SN << 2), output);
+            printf("0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
             break;
         }
 
@@ -597,18 +599,15 @@ int main(int argc, char *argv[])
             x = (R[28] & (0b11111 << 16)) >> 16;
             y = (R[28] & (0b11111 << 11)) >> 11;
 
-            // Execução da operação bit a bit 'and'
             R[z] = R[x] & R[y];
 
-            // Definindo os campos afetados
             ZN = (R[z] == 0);
-            SN = (R[z] & 0x80000000) != 0;
+            SN = (R[z] >> 31) & 1;
 
-            // Formatação da instrução
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
+
             sprintf(instrucao, "and r%u,r%u,r%u", z, x, y);
-
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%u=R%u&R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], (ZN << 1) | (SN << 2), output);
+            printf("0x%08X:\t%-25s\tR%u=R%u&R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
@@ -621,58 +620,55 @@ int main(int argc, char *argv[])
 
             R[z] = R[x] | R[y];
 
-            // Definindo os campos afetados
             ZN = (R[z] == 0);
-            SN = (R[z] & 0x80000000) != 0;
+            SN = (R[z] >> 31) & 1;
 
-            // Formatação da instrução
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
+
             sprintf(instrucao, "or r%u,r%u,r%u", z, x, y);
-
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%u=R%u|R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], (ZN << 1) | (SN << 2), output);
+            printf("0x%08X:\t%-25s\tR%u=R%u|R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
         case 0b001000: // Supondo que 'not' tenha opcode 0b001000
         {
-            z = (R[28] >> 21) & 0b11111; // Obtém o registrador z
-            x = (R[28] >> 16) & 0b11111; // Obtém o registrador x
+            z = (R[28] >> 21) & 0b11111;
+            x = (R[28] >> 16) & 0b11111;
 
-            // Execução da operação bit a bit 'not'
-            // crie uma máscara para inverter os bits
             R[z] = R[x] && 0xFFFFFFFF;
 
-            // Definindo os campos afetados
             ZN = (R[z] == 0);
-            SN = (R[z] & 0x80000000) != 0;
+            SN = (R[z] >> 31) & 1;
 
-            // Formatação da instrução
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
+
             sprintf(instrucao, "not r%u,r%u", z, x);
-
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%u=~R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, R[z], (ZN << 1) | (SN << 2), output);
+            printf("0x%08X:\t%-25s\tR%u=~R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, R[z], SR);
             break;
         }
 
         // xor
         case 0b001001:
         {
-            z = (R[28] >> 21) & 0b11111; // Obtém o registrador z
-            x = (R[28] >> 16) & 0b11111; // Obtém o registrador x
-            y = (R[28] >> 11) & 0b11111; // Obtém o registrador y
+            z = (R[28] >> 21) & 0b11111;
+            x = (R[28] >> 16) & 0b11111;
+            y = (R[28] >> 11) & 0b11111;
 
-            // Execução da operação XOR - utilizando máscara de bits para inverter os bits R[x] xor R[y]
-            R[z] = R[x] ^ R[y];
+            // Execução da operação de xor - ou exclusivo
+            // lembrando que ou exclusivo é do tipo A e não B ou B e não A
+            // crie variáveis temporárias para armazenar os valores de x e y
+            // e faça a operação de xor entre eles
+            uint32_t operand_A = (uint32_t)R[x];
+            uint32_t operand_B = (uint32_t)R[y];
+            // not A and not B or A and B
+            R[z] = (operand_A & ~operand_B) | (~operand_A & operand_B);
 
-            // Definindo os campos afetados
             ZN = (R[z] == 0);
-            SN = (R[z] & 0x80000000) != 0;
-
+            SN = (R[z] >> 31) & 1;
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
             // Formatação da instrução
             sprintf(instrucao, "xor r%u,r%u,r%u", z, x, y);
-
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%u=R%u^R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], (ZN << 1) | (SN ? 0x20 : 0x00), output);
+            printf("0x%08X:\t%-25s\tR%u=R%u^R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
@@ -681,23 +677,23 @@ int main(int argc, char *argv[])
         {
             z = (R[28] & (0b11111 << 21)) >> 21;
             x = (R[28] & (0b11111 << 16)) >> 16;
-            // i vai receber os bits 0 a 15 da instrução e o resto dos bits até 31 são iguais ao bit 15 da instrução
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-            // Execução da operação de adição imediata
-            R[z] = R[x] + i;
+            uint64_t temp_x = (uint64_t)R[x];
+            uint64_t temp_i = (uint64_t)i;
+            uint64_t temp_sum = temp_x + temp_i;
 
-            // Definindo os campos afetados
-            ZN = (R[z] == 0);
-            SN = (R[z] & 0x80000000) != 0;
-            OV = ((R[x] & 0x80000000) == (i & 0x8000)) && ((R[z] & 0x80000000) != (R[x] & 0x80000000));
-            CY = (R[z] < R[x]);
+            R[z] = (int)temp_sum;
 
-            // Formatação da instrução
-            sprintf(instrucao, "addi r%u,r%u,%d", z, x, i);
+            ZN = (temp_sum == 0);
+            SN = (temp_sum >> 31) & 1;
+            OV = ((temp_x >> 31) == (temp_i >> 15)) && ((temp_x >> 31) != (temp_sum >> 31));
+            CY = (temp_sum >> 32) & 1;
 
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%u=R%u+0x%08X=%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], (ZN << 1) | (SN ? 0x20 : 0x00) | (OV ? 0x10 : 0x00) | (CY ? 0x01 : 0x00), output);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+
+            sprintf(instrucao, "addi r%u,r%u,%i", z, x, i);
+            printf("0x%08X:\t%-25s\tR%u=R%u+%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -706,41 +702,46 @@ int main(int argc, char *argv[])
         {
             z = (R[28] & (0b11111 << 21)) >> 21;
             x = (R[28] & (0b11111 << 16)) >> 16;
-            // i vai receber os bits 0 a 15 da instrução e o resto dos bits até 31 são iguais ao bit 15 da instrução
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-            // Execução da operação de subtração imediata
-            R[z] = R[x] - i;
+            uint64_t temp_x = (uint64_t)R[x];
+            uint64_t temp_i = (uint64_t)i;
+            uint64_t temp_sum = temp_x - temp_i;
 
-            // Definindo os campos afetados
-            ZN = (R[z] == 0);
-            SN = (R[z] & 0x80000000) != 0;
-            OV = ((R[x] & 0x80000000) != (i & 0x8000)) && ((R[z] & 0x80000000) != (R[x] & 0x80000000));
-            CY = (R[z] > R[x]);
+            R[z] = (int)temp_sum;
 
-            // Formatação da instrução
-            sprintf(instrucao, "subi r%d,r%d,%d", z, x, -i); // Inverte o sinal do i para representar a subtração
+            ZN = (temp_sum == 0);
+            SN = (temp_sum >> 31) & 1;
+            OV = ((temp_x >> 31) != (temp_i >> 15)) && ((temp_x >> 31) != (temp_sum >> 31));
+            CY = (temp_sum >> 32) & 1;
 
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%d=R%d-%d=%08X,SR=%08X\n", R[29], instrucao, z, x, -i, R[z], (ZN << 5) | (SN << 4) | (OV << 3) | CY, output);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            sprintf(instrucao, "subi r%u,r%u,%i", z, x, i);
+            printf("0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
         // muli
         case 0b010100:
         {
-            z = (R[28] >> 21) & 0b11111; // Obtém o registrador z
-            x = (R[28] >> 16) & 0b11111; // Obtém o registrador x
-            // i vai receber os bits 0 a 15 da instrução e o resto dos bits até 31 são iguais ao bit 15 da instrução
+            z = (R[28] & (0b11111 << 21)) >> 21;
+            x = (R[28] & (0b11111 << 16)) >> 16;
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
-            (int64_t) R[z];
-            R[z] = (int64_t)R[x] * (int64_t)i; // TODO: Verificar se R[z] está em 64 bits
 
-            // Formatação da instrução
-            sprintf(instrucao, "muli r%d,r%d,%d", z, x, i);
+            uint64_t temp_x = (uint64_t)R[x];
+            uint64_t temp_i = (uint64_t)i;
+            uint64_t temp_muli = temp_x * temp_i;
 
-            // Formatação de saída
-            // TODO: completar
+            R[z] = (int)temp_muli;
+
+            ZN = (temp_muli == 0);
+            // pegue os bits 63 até 32 de Rz usando uma máscara de bits e compare o valor com 0
+            SN = (temp_muli >> 31) & 1; // TODO: Corrigir
+
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+
+            sprintf(instrucao, "subi r%u,r%u,%i", z, x, i);
+            printf("0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -749,82 +750,68 @@ int main(int argc, char *argv[])
         {
             z = (R[28] & (0b11111 << 21)) >> 21;
             x = (R[28] & (0b11111 << 16)) >> 16;
-            i = (R[28] & (0b11111 << 0)) >> 0;
-
-            // i vai receber os bits 0 a 15 da instrução e o resto dos bits até 31 são iguais ao bit 15 da instrução
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
-            R[z] = R[x] / i;
 
-            // Verificando se o divisor é zero
-            if (i == 0)
-            {
-                // fprintf("Divisão por zero!\n", output);
-                break;
-            }
-            // Execução da operação de divisão imediata
-            R[z] = R[x] / i;
-            // Definindo os campos afetados
-            ZN = (R[z] == 0);
-            ZD = (i == 0);
+            uint64_t temp_x = (uint64_t)R[x];
+            uint64_t temp_i = (uint64_t)i;
+            uint64_t temp_divi = temp_x * temp_i;
+
+            R[z] = (int)temp_divi;
+
+            ZN = (temp_divi == 0);
+            SN = (temp_i == 0); // TODO: Corrigir
             OV = 0;
 
-            // Formatação da instrução
-            sprintf(instrucao, "divi r%d,r%d,%d", z, x, i);
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%d=R%d/%d=%08X,SR=%08X\n", R[29], instrucao, z, x, i, R[z], (ZN << 5) | (ZD << 4) | (OV << 3), output);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            sprintf(instrucao, "divi r%u,r%u,%i", z, x, i);
+            printf("0x%08X:\t%-25s\tR%u=R%u/%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
         // modi
         case 0b010110:
         {
-            z = (R[28] >> 21) & 0x1F;
-            x = (R[28] >> 16) & 0x1F;
-            i = (int16_t)(R[28] & 0xFFFF); // Conversão para um inteiro de 16 bits com sinal
+            z = (R[28] & (0b11111 << 21)) >> 21;
+            x = (R[28] & (0b11111 << 16)) >> 16;
+            i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-            // Verificando se o divisor é zero
-            if (i == 0)
-            {
-                // fprintf("Divisão por zero!\n", output);
-                break;
-            }
+            uint64_t temp_x = (uint64_t)R[x];
+            uint64_t temp_i = (uint64_t)i;
+            uint64_t temp_modi = temp_x % temp_i;
 
-            // Execução da operação de resto imediato
-            R[z] = R[x] % i;
+            R[z] = (int)temp_modi;
 
-            // Definindo os campos afetados
-            ZN = (R[z] == 0);
-            ZD = (i == 0);
+            ZN = (temp_modi == 0);
+            SN = (temp_i == 0); // TODO: Corrigir
             OV = 0;
 
-            // Formatação da instrução
-            sprintf(instrucao, "modi r%d,r%d,%d", z, x, i);
-
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tR%d=R%d%%%d=%08X,SR=%08X\n", R[29], instrucao, z, x, i, R[z], (ZN << 5) | (ZD << 4) | (OV << 3), output);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            sprintf(instrucao, "modi r%u,r%u,%i", z, x, i);
+            printf("0x%08X:\t%-25s\tR%u=R%u%%%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
         // cmpi
         case 0b010111:
         {
-            z = (R[28] & (0b11111 << 16)) >> 16;
+            z = (R[28] & (0b11111 << 21)) >> 21;
+            x = (R[28] & (0b11111 << 16)) >> 16;
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
+            int64_t CMPI;
+            uint64_t temp_x = (uint64_t)R[x];
+            uint64_t temp_i = (uint64_t)i;
+            uint64_t temp_cmpi = temp_x - temp_i;
 
-            // Execução da operação de comparação imediata
-            int64_t CMPI = R[x] - i;
+            CMPI = (int)temp_cmpi;
 
-            // Definindo os campos afetados
-            ZN = (CMPI == 0);
-            SN = (CMPI >> 31) & 0x1;
-            OV = ((R[x] >> 31) != (i >> 15)) && ((CMPI >> 31) != (R[x] >> 31));
-            CY = (CMPI >> 32) & 0x1;
+            ZN = (temp_cmpi == 0);
+            SN = (temp_cmpi >> 31) & 1;
+            OV = ((temp_x >> 31) != (temp_i >> 15)) && ((temp_x >> 31) != (temp_cmpi >> 31));
+            CY = (temp_cmpi >> 32) & 1;
 
-            // Formatação da instrução
-            sprintf(instrucao, "cmpi r%d,%d", x, i);
-
-            // Formatação de saída
-            // fprintf("0x%08X:\t%-25s\tSR=%08X\n", R[29], instrucao, (ZN << 3) | (SN << 2) | (OV << 1) | CY, output);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            sprintf(instrucao, "cmpi r%u,%i", x, i);
+            printf("0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
             break;
         }
 
@@ -844,65 +831,271 @@ int main(int argc, char *argv[])
             break;
         }
 
-            // case 0b011011: // s8
-            // {
-            //     // Otendo operandos
-            //     z = (R[28] & (0b11111 << 21)) >> 21;
-            //     x = (R[28] & (0b11111 << 16)) >> 16;
-            //     i = R[28] & 0xFFFF;
-            //     // Execucao do comportamento com MEM8 e MEM32
-            //     MEM8[R[x] + i] | (((uint8_t *)(MEM32))[(R[x] + i) >> 2]) = R[z];
-            //     // Formatacao da instrucao
-            //     sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
-            //     // Formatacao de saida em tela (deve mudar para o arquivo de saida)
-            // //     fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z,
-            //            R[x] + i, R[z]);
-            //     break;
-            // }
+        case 0b101010:
+        {
+            // bae
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
 
-            // case 0b011100: // s16
-            // {
-            //     // Otendo operandos
-            //     z = (R[28] & (0b11111 << 21)) >> 21;
-            //     x = (R[28] & (0b11111 << 16)) >> 16;
-            //     i = R[28] & 0xFFFF;
-            //     // Execucao do comportamento com MEM8 e MEM32
-            //     MEM8[R[x] + i] | (((uint8_t *)(MEM32))[(R[x] + i) >> 2]) = R[z];
-            //     // Formatacao da instrucao
-            //     sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
-            //     // Formatacao de saida em tela (deve mudar para o arquivo de saida)
-            // //     fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z,
-            //            R[x] + i, R[z]);
-            //     break;
-            // }
+        case 0b101011:
+        {
+            // bat
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
 
-            // case 0b011101: // s32
-            // {
-            //     // Otendo operandos
-            //     z = (R[28] & (0b11111 << 21)) >> 21;
-            //     x = (R[28] & (0b11111 << 16)) >> 16;
-            //     i = R[28] & 0xFFFF;
-            //     // Execucao do comportamento com MEM8 e MEM32
-            //     MEM8[R[x] + i] | (((uint8_t *)(MEM32))[(R[x] + i) >> 2]) = R[z];
-            //     // Formatacao da instrucao
-            //     sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
-            //     // Formatacao de saida em tela (deve mudar para o arquivo de saida)
-            // //     fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z,
-            //            R[x] + i, R[z]);
-            //     break;
-            // }
+        case 0b101100:
+        {
+            // bbe
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
 
-            // case 0b101010:
-            // {
-            //     // Extrair o valor imediato do opcode
-            //     i = R[28] & 0xFFFFFF;
+        case 0b101101:
+        {
+            // bbt
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
 
-            //     // Calcular o novo valor do PC (Program Counter)
-            //     R[28] += 4 + ((i << 2) & 0xFFFFFFFC); // Shift left de 2 bits e alinhamento de palavra
+        case 0b101110:
+        {
+            // beq
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
 
-            //     // Imprimir o formato de saída
-            // //     fprintf("0x%08X:\tbae %d\tPC=0x%08X\n", R[28] - 4, i, R[28]);
-            // }
+        case 0b101111:
+        {
+            // bge
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b110000:
+        {
+            // bgt
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b110001:
+        {
+            // biv
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b110010:
+        {
+            // ble
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b110011:
+        {
+            // blt
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b110100:
+        {
+            // bne
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b110101:
+        {
+            // bni
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b110110:
+        {
+            // bnz
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b111000:
+        {
+            // bzd
+            // PC = PC + 4 + (i(32 bits) << 2)
+            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+            R[29] = R[29] + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b011110:
+        {
+            // MEM[SP] = PC + 4
+            // Lembre que existe MEM8 e MEM32
+            // aux15 vai recebendo os bits de 0 até 15 e os demais bits serão iguais ao bit 15
+
+            uint32_t aux15 = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
+            MEM8[SP] = (PC + 4) & 0xFF;
+            MEM8[SP + 1] = ((PC + 4) >> 8) & 0xFF;
+            MEM8[SP + 2] = ((PC + 4) >> 16) & 0xFF;
+            MEM8[SP + 3] = ((PC + 4) >> 24) & 0xFF;
+            MEM32[SP] = PC + 4;
+
+            // SP = SP - 4
+            SP = SP - 4;
+            PC = (R[x] + aux15) << 2;
+            // Formato de saída
+            break;
+        }
+
+        case 0b111001:
+        {
+            // MEM[SP] = PC + 4
+            // Lembre que existe MEM8 e MEM32
+            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
+
+            MEM8[SP] = (PC + 4) & 0xFF;
+            MEM8[SP + 1] = ((PC + 4) >> 8) & 0xFF;
+            MEM8[SP + 2] = ((PC + 4) >> 16) & 0xFF;
+            MEM8[SP + 3] = ((PC + 4) >> 24) & 0xFF;
+            MEM32[SP] = PC + 4;
+
+            SP = SP - 4;
+            PC = PC + 4 + (aux << 2);
+            break;
+        }
+
+        case 0b011111:
+        {
+            // SP = SP + 4
+            // PC = MEM[SP]
+            // Lembre que existe MEM8 e MEM32
+            SP = SP + 4;
+            PC = MEM32[SP];
+            // Formato de saída
+            sprintf(instrucao, "ret");
+            printf("0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, PC);
+            break;
+        }
+
+        case 0b001010:
+        {
+            // i vai receber os bits 0 até 25
+            i = R[28] & 0xFFFFFF;
+
+            // se i != 0, MEM[SP] = R[i] e SP = SP - 4
+            if (i != 0)
+            {
+                MEM32[SP] = R[i];
+                SP = SP - 4;
+            }
+        }
+
+        case 0b001011:
+        {
+            // i vai receber os bits 0 até 25
+            i = R[28] & 0xFFFFFF;
+
+            // se i != 0 , SP = SP + 4 , R[i] = MEM[SP]
+            if (i != 0)
+            {
+                SP = SP + 4;
+                R[i] = MEM32[SP];
+            }
+        }
+
+        case 0b011011:
+            // s8
+            {
+                // Otendo operandos
+                // z = (R[28] & (0b11111 << 21)) >> 21;
+                // x = (R[28] & (0b11111 << 16)) >> 16;
+                // i = R[28] & 0xFFFF;
+                // // Execucao do comportamento com MEM8 e MEM32
+                // MEM8[R[x] + i] |
+                //     (((uint8_t *)(MEM32))[(R[x] + i) >> 2]) = R[z];
+                // // Formatacao da instrucao
+                // sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
+                // // Formatacao de saida em tela(deve mudar para o arquivo de saida)
+                // fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z,
+                //         R[x] + i, R[z]);
+                break;
+            }
+
+        case 0b011100:
+            // s16
+            {
+                // Otendo operandos
+                // z = (R[28] & (0b11111 << 21)) >> 21;
+                // x = (R[28] & (0b11111 << 16)) >> 16;
+                // i = R[28] & 0xFFFF;
+                // // Execucao do comportamento com MEM8 e MEM32
+                // MEM8[R[x] + i] |
+                //     (((uint8_t *)(MEM32))[(R[x] + i) >> 2]) = R[z];
+                // // Formatacao da instrucao
+                // sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
+                // // Formatacao de saida em tela(deve mudar para o arquivo de saida)
+                // fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z, R[x] + i, R[z]);
+                break;
+            }
+
+        case 0b011101: // s32
+        {
+            // // Otendo operandos
+            // z = (R[28] & (0b11111 << 21)) >> 21;
+            // x = (R[28] & (0b11111 << 16)) >> 16;
+            // i = R[28] & 0xFFFF;
+            // // Execucao do comportamento com MEM8 e MEM32
+            // MEM8[R[x] + i] | (((uint8_t *)(MEM32))[(R[x] + i) >> 2]) = R[z];
+            // // Formatacao da instrucao
+            // sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
+            // // Formatacao de saida em tela (deve mudar para o arquivo de saida)
+            // //     fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z, R[x] + i, R[z]);
+            break;
+        }
 
         case 0b000100:
         {
@@ -941,9 +1134,10 @@ int main(int argc, char *argv[])
             }
             else if (R[28] & (0b000 << 8) >> 8)
             {
-                printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                printf("teste");
                 break;
             }
+            break;
         }
 
         // Instrucao desconhecida
