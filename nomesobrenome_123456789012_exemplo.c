@@ -27,15 +27,15 @@ uint32_t pot(uint32_t number, uint32_t exp)
 // Funcao principal
 int main(int argc, char *argv[])
 {
-    // FILE *input = fopen(argv[1], "r");
-    // FILE *output = fopen(argv[2], "w");
+    FILE *input = fopen(argv[1], "r");
+    FILE *output = fopen(argv[2], "w");
     // Exibindo a quantidade de argumentos
-    printf("Quantidade de argumentos (argc): %i\n", argc);
+    fprintf(output, "Quantidade de argumentos (argc): %i\n", argc);
     // Iterando sobre o(s) argumento(s) do programa
     for (uint32_t i = 0; i < argc; i++)
     {
         // Mostrando o argumento i
-        printf("Argumento %i (argv[%i]): %s\n", i, i, argv[i]);
+        fprintf(output, "Argumento %i (argv[%i]): %s\n", i, i, argv[i]);
     }
     // Abrindo os arquivos com as permissoes corretas
 
@@ -372,21 +372,21 @@ int main(int argc, char *argv[])
     MEM32[29] = 0xFC000000;
 
     // Imprimindo o conteudo das memorias em bytes
-    printf("\nMEM8:\n");
+    fprintf(output, "\nMEM8:\n");
     for (uint8_t i = 0; i < 120; ++i)
     {
-        printf("0x%08X: 0x%02X\n", i, MEM8[i]);
+        fprintf(output, "0x%08X: 0x%02X\n", i, MEM8[i]);
     }
-    printf("\nMEM32:\n");
+    fprintf(output, "\nMEM32:\n");
     for (uint8_t i = 0; i < 30; ++i)
     {
-        printf("0x%08X: 0x%08X\n", i << 2, MEM32[i]);
+        fprintf(output, "0x%08X: 0x%08X\n", i << 2, MEM32[i]);
     }
 
     // Separador da saida esperada
-    printf("\nSaida esperada\n\n      |       \n      V       \n\n");
+    fprintf(output, "\nSaida esperada\n\n      |       \n      V       \n\n");
     // Exibindo a inicializacao da execucao
-    printf("[START OF SIMULATION]\n");
+    fprintf(output, "[START OF SIMULATION]\n");
     // Setando a condicao de execucao para verdadeiro
     uint8_t executa = 1;
     uint32_t SR = R[31];
@@ -423,6 +423,49 @@ int main(int argc, char *argv[])
         // Decodificando a instrucao buscada na memoria
         switch (opcode)
         {
+
+        case 0b000100:
+        {
+            if (R[28] & (0b011 << 8) >> 8)
+            {
+                z = (R[28] & (0b11111 << 21)) >> 21;
+                x = (R[28] & (0b11111 << 16)) >> 16;
+                y = (R[28] & (0b11111 << 11)) >> 11;
+                i = (R[28] & (0b11111 << 0)) >> 0;
+
+                // Converta os valores para int64_t
+                uint32_t temp_z = (uint32_t)R[z];
+                uint32_t temp_y = (uint32_t)R[y];
+
+                // Combina os bits em result
+                int64_t result_sla = ((temp_z << 32) | temp_y) << (i + 1);
+
+                // Isola os 32 bits mais significativos e os 32 bits menos significativos
+                uint32_t high_bits = result_sla >> 32;
+                uint32_t low_bits = result_sla & 0xFFFFFFFF;
+
+                R[z] = high_bits;
+                R[x] = low_bits;
+
+                // Atualização do registrador de status(SR)
+                ZN = (result_sla == 0);
+                OV = (high_bits != 0);
+
+                SR = (ZN << 6) | (OV << 3);
+                // Formatação da instrução
+                //     sla r0,
+                // r2, r2 R0 = R2 << 2 = 0xFFF00000, SR = 0x00000001 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
+                sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
+                fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_sla, SR);
+                break;
+            }
+            else if (R[28] & (0b000 << 8) >> 8)
+            {
+                fprintf(output, "teste");
+                break;
+            }
+            break;
+        }
         // mov
         case 0b000000:
         {
@@ -433,7 +476,7 @@ int main(int argc, char *argv[])
             sprintf(instrucao, "mov r%u,%u", z, xyl);
             // Formato de saída
             // 0x00000020:	mov r1,1193046           	R1=0x00123456
-            printf("0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
             break;
         }
 
@@ -474,7 +517,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
 
             sprintf(instrucao, "add r%u,r%u,r%u", z, x, y);
-            printf("0x%08X:\t%-25s\tR%u=R%u+R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
@@ -509,7 +552,7 @@ int main(int argc, char *argv[])
             // multiplica o valor convertido em binário por 2^2 = 4
             // Formatacao da instrucao
             sprintf(instrucao, "bun %i", R[28] & 0x3FFFFFF);
-            printf("0x%08X:\t%-25s\tPC=0x%08X\n", pc, instrucao, R[29] + 4);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", pc, instrucao, R[29] + 4);
 
             break;
         }
@@ -547,7 +590,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
             sprintf(instrucao, "sub r%u,r%u,r%u", z, x, y);
-            printf("0x%08X:\t%-25s\tR%u=R%u-R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
@@ -564,7 +607,7 @@ int main(int argc, char *argv[])
             R[z] = xyl;
 
             sprintf(instrucao, "movs r%u,%i", z, xyl);
-            printf("0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
             break;
         }
 
@@ -588,7 +631,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
             sprintf(instrucao, "cmp r%u,r%u", x, y);
-            printf("0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
+            fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
             break;
         }
 
@@ -607,7 +650,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
             sprintf(instrucao, "and r%u,r%u,r%u", z, x, y);
-            printf("0x%08X:\t%-25s\tR%u=R%u&R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u&R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
@@ -626,7 +669,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
             sprintf(instrucao, "or r%u,r%u,r%u", z, x, y);
-            printf("0x%08X:\t%-25s\tR%u=R%u|R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u|R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
@@ -643,7 +686,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
             sprintf(instrucao, "not r%u,r%u", z, x);
-            printf("0x%08X:\t%-25s\tR%u=~R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=~R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, R[z], SR);
             break;
         }
 
@@ -668,7 +711,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
             // Formatação da instrução
             sprintf(instrucao, "xor r%u,r%u,r%u", z, x, y);
-            printf("0x%08X:\t%-25s\tR%u=R%u^R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u^R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
             break;
         }
 
@@ -693,7 +736,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
 
             sprintf(instrucao, "addi r%u,r%u,%i", z, x, i);
-            printf("0x%08X:\t%-25s\tR%u=R%u+%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -717,7 +760,7 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             sprintf(instrucao, "subi r%u,r%u,%i", z, x, i);
-            printf("0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -741,7 +784,7 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
 
             sprintf(instrucao, "subi r%u,r%u,%i", z, x, i);
-            printf("0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -764,7 +807,7 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             sprintf(instrucao, "divi r%u,r%u,%i", z, x, i);
-            printf("0x%08X:\t%-25s\tR%u=R%u/%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u/%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -787,7 +830,7 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             sprintf(instrucao, "modi r%u,r%u,%i", z, x, i);
-            printf("0x%08X:\t%-25s\tR%u=R%u%%%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -811,7 +854,7 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             sprintf(instrucao, "cmpi r%u,%i", x, i);
-            printf("0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
+            fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
             break;
         }
 
@@ -1017,7 +1060,7 @@ int main(int argc, char *argv[])
             PC = MEM32[SP];
             // Formato de saída
             sprintf(instrucao, "ret");
-            printf("0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, PC);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, PC);
             break;
         }
 
@@ -1060,7 +1103,7 @@ int main(int argc, char *argv[])
                 // // Formatacao da instrucao
                 // sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
                 // // Formatacao de saida em tela(deve mudar para o arquivo de saida)
-                // fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z,
+                // ffprintf(output,"0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z,
                 //         R[x] + i, R[z]);
                 break;
             }
@@ -1078,7 +1121,7 @@ int main(int argc, char *argv[])
                 // // Formatacao da instrucao
                 // sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
                 // // Formatacao de saida em tela(deve mudar para o arquivo de saida)
-                // fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z, R[x] + i, R[z]);
+                // ffprintf(output,"0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z, R[x] + i, R[z]);
                 break;
             }
 
@@ -1093,57 +1136,14 @@ int main(int argc, char *argv[])
             // // Formatacao da instrucao
             // sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
             // // Formatacao de saida em tela (deve mudar para o arquivo de saida)
-            // //     fprintf("0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z, R[x] + i, R[z]);
-            break;
-        }
-
-        case 0b000100:
-        {
-            if (R[28] & (0b011 << 8) >> 8)
-            {
-                z = (R[28] & (0b11111 << 21)) >> 21;
-                x = (R[28] & (0b11111 << 16)) >> 16;
-                y = (R[28] & (0b11111 << 11)) >> 11;
-                i = (R[28] & (0b11111 << 0)) >> 0;
-
-                // Converta os valores para int64_t
-                uint32_t temp_z = (uint32_t)R[z];
-                uint32_t temp_y = (uint32_t)R[y];
-
-                // Combina os bits em result
-                int64_t result_sla = ((temp_z << 32) | temp_y) << (i + 1);
-
-                // Isola os 32 bits mais significativos e os 32 bits menos significativos
-                uint32_t high_bits = result_sla >> 32;
-                uint32_t low_bits = result_sla & 0xFFFFFFFF;
-
-                R[z] = high_bits;
-                R[x] = low_bits;
-
-                // Atualização do registrador de status(SR)
-                ZN = (result_sla == 0);
-                OV = (high_bits != 0);
-
-                SR = (ZN << 6) | (OV << 3);
-                // Formatação da instrução
-                //     sla r0,
-                // r2, r2 R0 = R2 << 2 = 0xFFF00000, SR = 0x00000001 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
-                sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
-                printf("0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_sla, SR);
-                break;
-            }
-            else if (R[28] & (0b000 << 8) >> 8)
-            {
-                printf("teste");
-                break;
-            }
+            // //     ffprintf(output,"0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%02X\n", R[29], instrucao, z, R[x] + i, R[z]);
             break;
         }
 
         // Instrucao desconhecida
         default:
             // Exibindo mensagem de erro
-            printf("Instrucao desconhecida!\n");
+            fprintf(output, "Instrucao desconhecida!\n");
             // Parar a execucao
             executa = 0;
         }
@@ -1151,10 +1151,10 @@ int main(int argc, char *argv[])
         R[29] = R[29] + 4;
     }
     // Exibindo a finalizacao da execucao
-    printf("[END OF SIMULATION]\n");
+    fprintf(output, "[END OF SIMULATION]\n");
     // Fechando os arquivos
-    // fclose(input);
-    // fclose(output);
+    fclose(input);
+    fclose(output);
     // Finalizando programa
     return 0;
 }
