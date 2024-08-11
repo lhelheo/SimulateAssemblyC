@@ -639,12 +639,14 @@ int main(int argc, char *argv[])
             z = (R[28] >> 21) & 0b11111;
             x = (R[28] >> 16) & 0b11111;
 
-            R[z] = R[x] && 0xFFFFFFFF;
+            // Corrigir a operação NOT
+            R[z] = ~R[x] & 0xFFFFFFFF;  // Inverter todos os bits de R[x] e garantir que apenas 32 bits sejam usados
 
             ZN = (R[z] == 0);
             SN = (R[z] >> 31) & 1;
 
-            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
+            // Presumindo que ZD, OV e CY são definidos em algum lugar antes desta parte do código
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0) | SR;
 
             sprintf(instrucao, "not r%u,r%u", z, x);
             fprintf(output, "0x%08X:\t%-25s\tR%u=~R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, R[z], SR);
@@ -697,29 +699,38 @@ int main(int argc, char *argv[])
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
 
             sprintf(instrucao, "addi r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
         // subi
         case 0b010011:
         {
-            z = (R[28] & (0b11111 << 21)) >> 21;
-            x = (R[28] & (0b11111 << 16)) >> 16;
-            i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
+           z = (R[28] >> 21) & 0b11111; // Extrai o índice do destino
+            x = (R[28] >> 16) & 0b11111; // Extrai o índice da fonte
+            i = (R[28] & 0xFFFF);        // Extrai o valor imediato (16 bits)
 
-            uint64_t temp_x = (uint64_t)R[x];
-            uint64_t temp_i = (uint64_t)i;
-            uint64_t temp_sum = temp_x - temp_i;
+            // Extensão do sinal para o imediato (considerando que i é um valor com sinal de 16 bits)
+            if (i & 0x8000) {
+                i |= 0xFFFF0000; // Extende o sinal para 32 bits
+            } else {
+                i &= 0x0000FFFF; // Garante que o valor é positivo (sem extensão de sinal necessária)
+            }
 
-            R[z] = (int)temp_sum;
+            int32_t temp_x = (int32_t)R[x]; // Converte o valor do registro x para 32 bits com sinal
+            int32_t temp_i = (int32_t)i;    // O valor do imediato já está como 32 bits com sinal após extensão
+            int32_t temp_sum = temp_x - temp_i; // Realiza a subtração
 
-            ZN = (temp_sum == 0);
-            SN = (temp_sum >> 31) & 1;
-            OV = ((temp_x >> 31) != (temp_i >> 15)) && ((temp_x >> 31) != (temp_sum >> 31));
-            CY = (temp_sum >> 32) & 1;
+            R[z] = temp_sum; // Armazena o resultado no registro destino
 
-            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            // Atualiza as flags
+            ZN = (temp_sum == 0);              // Zero flag
+            SN = (temp_sum >> 31) & 1;         // Sign flag
+            OV = ((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0; // Overflow flag
+            CY = (temp_x < temp_i);            // Carry flag (empréstimo se minuendo é menor que subtraendo)
+
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
+
             sprintf(instrucao, "subi r%u,r%u,%i", z, x, i);
             fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
@@ -1131,7 +1142,7 @@ int main(int argc, char *argv[])
                 ZN = (result_mul == 0);
                 OV = (R[i] != 0);
 
-                SR = (ZN << 6) | (OV << 3);
+                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
                 // Formatação da instrução
                 //     sla r0,
                 // r2, r2 R0 = R2 << 2 = 0xFFF00000, SR = 0x00000001 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
@@ -1165,7 +1176,7 @@ int main(int argc, char *argv[])
                 ZN = (result_sll == 0);
                 OV = (R[z] != 0);
 
-                SR = (ZN << 6) | (OV << 3);
+                SR = (ZN << 6) | (OV << 3) | SR;
                 // Formatação da instrução
                 //     sla r0,
                 // r2, r2 R0 = R2 << 2 = 0xFFF00000, SR = 0x00000001 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
@@ -1259,8 +1270,9 @@ int main(int argc, char *argv[])
                 // Formatação da instrução
                 //     sla r0,
                 // saída esperada 0x00000044:	div r0,r9,r8,r7          	R0=R8%R7=0x00000000,R9=R8/R7=0x00000000,SR=0x00000060
-                // sprintf(instrucao, "div r%u,r%u,r%u,r%u", z, x, y, i);
-                // fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, result_mod, i, x, y, result_div, SR);
+                sprintf(instrucao, "div r%u,r%u,r%u,r%u", i , z, x, y);
+                //  R[i] = R[x] mod R[y], R[z] = R[x] ÷ R[y]
+                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
                 break;
             }
             case 0b101:
@@ -1284,48 +1296,54 @@ int main(int argc, char *argv[])
                 // O SRL não altera o sinal ou causa overflow
 
                 // Atualização do registrador de status (SR)
-                SR = (ZN << 6) | (OV << 3);
+                SR = (ZN << 6) | (OV << 3) | SR;
 
                 // Formatação da instrução
-                sprintf(instrucao, "srl r%u, r%u, r%u, %u", z, x, y, i);
-                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u>>%u=0x%016llX, SR=0x%08X\n",
-                        R[29], instrucao, z, z, i, result_srl, SR);
+                sprintf(instrucao, "srl r%u,r%u,r%u,%u", z, x, y, i);
+                // formato de saída fprint semelhante ao de sla
+                fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u>>%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_srl, SR);
                 break;
             }
             case 0b110:
             {
-                z = (R[28] & (0b11111 << 21)) >> 21;
-                x = (R[28] & (0b11111 << 16)) >> 16;
-                y = (R[28] & (0b11111 << 11)) >> 11;
-                i = (R[28] & (0b11111 << 0)) >> 0;
+                 z = (R[28] & (0b11111 << 21)) >> 21;
+                 x = (R[28] & (0b11111 << 16)) >> 16;
+                 y = (R[28] & (0b11111 << 11)) >> 11;
+                 i = (R[28] & (0b11111 << 0)) >> 0;
 
-                // Calcula a operação de módulo e divisão
-                uint32_t temp_x = (uint32_t)R[x];
-                uint32_t temp_y = (uint32_t)R[y];
-                uint32_t temp_i = (uint32_t)R[i];
+                // Converta os valores para uint32_t
+                uint32_t temp_x = R[x];
+                uint32_t temp_y = R[y];
+                uint32_t temp_z = R[z];
 
-                // Verifica se o divisor é zero
-                if (temp_y == 0)
-                {
-                    fprintf(output, "Divisão por zero detectada. Instrução ignorada.\n");
-                    break;
+                // Verifica se o divisor é zero para evitar divisão por zero
+                if (temp_y != 0) {
+                    // Calcula o resultado da divisão e do módulo
+                    uint32_t result_mod = temp_x % temp_y;
+                    uint32_t result_div = temp_x / temp_y;
+
+                    // Atualiza os registradores com os resultados
+                    R[i] = result_mod;
+                    R[z] = result_div;
+
+                    // Atualização do registrador de status(SR)
+                    ZN = (result_div == 0);
+                    ZD = (temp_y == 0);
+                    OV = (i != 0);  // Assumindo que a flag OV está relacionada com i não sendo zero
+
+                    // Atualiza o SR com as flags
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+                } else {
+                    // Caso divisor seja zero, atualiza SR de acordo com o erro (divisão por zero)
+                    fprintf(stderr, "Erro: Divisão por zero.\n");
+                    SR = (SR & ~(1 << 5)) | (1 << 5); // Atualiza a flag ZD para indicar erro
                 }
 
-                // Calcula o módulo e a divisão
-                R[i] = temp_x % temp_y;
-                R[z] = temp_x / temp_y;
-
-                // Atualização do registrador de status (SR)
-                ZN = (R[z] == 0);
-                ZD = (R[y] == 0);
-                OV = (R[i] != 0);
-
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-
                 // Formatação da instrução
-                sprintf(instrucao, "mod r%u, r%u, r%u", i, x, y);
-                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X, R%u=R%u/R%u=0x%08X, SR=0x%08X\n",
-                        R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
+                sprintf(instrucao, "divs r%u,r%u,r%u,r%u", i, z, x, y);
+
+                // Saída esperada
+                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
                 break;
             }
 
@@ -1342,7 +1360,7 @@ int main(int argc, char *argv[])
                 ZN = (R[z] == 0);
                 OV = (R[z] != 0);
 
-                SR = (ZN << 6) | (OV << 3);
+                SR = (ZN << 6) | (OV << 3) | SR;
                 sprintf(instrucao, "sra r%u,r%u,r%u,%u", z, x, y, i);
                 fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u>>%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_sra, SR);
                 break;
