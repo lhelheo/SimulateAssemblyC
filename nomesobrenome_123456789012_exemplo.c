@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
     MEM8[106] = 0x00;
     MEM8[107] = 0x01;
     MEM32[26] = 0x4A310001;
-    // 0x4E52FFFF MULI
+    // 0x4E52FFFF SUBI
     MEM8[108] = 0x4E;
     MEM8[109] = 0x52;
     MEM8[110] = 0xFF;
@@ -640,7 +640,7 @@ int main(int argc, char *argv[])
             x = (R[28] >> 16) & 0b11111;
 
             // Corrigir a operação NOT
-            R[z] = ~R[x] & 0xFFFFFFFF;  // Inverter todos os bits de R[x] e garantir que apenas 32 bits sejam usados
+            R[z] = ~R[x] & 0xFFFFFFFF; // Inverter todos os bits de R[x] e garantir que apenas 32 bits sejam usados
 
             ZN = (R[z] == 0);
             SN = (R[z] >> 31) & 1;
@@ -706,33 +706,36 @@ int main(int argc, char *argv[])
         // subi
         case 0b010011:
         {
-           z = (R[28] >> 21) & 0b11111; // Extrai o índice do destino
-            x = (R[28] >> 16) & 0b11111; // Extrai o índice da fonte
-            i = (R[28] & 0xFFFF);        // Extrai o valor imediato (16 bits)
+            // printf opcode R[29]
+            printf("opcode: %08X\n", R[28]);
+            z = (R[28] >> 21) & 0b11111;
+            x = (R[28] >> 16) & 0b11111;
+            // i vai receber os 16 bits menos significativos preenchendos os demais com 0
+            i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-            // Extensão do sinal para o imediato (considerando que i é um valor com sinal de 16 bits)
-            if (i & 0x8000) {
-                i |= 0xFFFF0000; // Extende o sinal para 32 bits
-            } else {
-                i &= 0x0000FFFF; // Garante que o valor é positivo (sem extensão de sinal necessária)
-            }
+            printf("i: %08X\n", i);
+            printf("i: %d\n", i);
 
-            int32_t temp_x = (int32_t)R[x]; // Converte o valor do registro x para 32 bits com sinal
-            int32_t temp_i = (int32_t)i;    // O valor do imediato já está como 32 bits com sinal após extensão
-            int32_t temp_sum = temp_x - temp_i; // Realiza a subtração
+            int32_t temp_x = (int32_t)R[x];
+            int32_t temp_i = (int32_t)i;
 
-            R[z] = temp_sum; // Armazena o resultado no registro destino
+            int32_t temp_sum = temp_x - temp_i;
 
-            // Atualiza as flags
-            ZN = (temp_sum == 0);              // Zero flag
-            SN = (temp_sum >> 31) & 1;         // Sign flag
+            R[z] = temp_sum;
+
+            ZN = (temp_sum == 0);                                             // Zero flag
+            SN = (temp_sum >> 31) & 1;                                        // Sign flag
             OV = ((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0; // Overflow flag
-            CY = (temp_x < temp_i);            // Carry flag (empréstimo se minuendo é menor que subtraendo)
+            CY = (temp_x < temp_i);
+
+            printf("x: %d\n", x);
+            printf("y: %d\n", y);
+            // print i hexadecimal 0x0000
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
-            sprintf(instrucao, "subi r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            sprintf(instrucao, "subi r%u,r%u,%u", z, x, i); // Usando %d para garantir que i seja exibido como número com sinal
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-%d=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
@@ -1270,7 +1273,7 @@ int main(int argc, char *argv[])
                 // Formatação da instrução
                 //     sla r0,
                 // saída esperada 0x00000044:	div r0,r9,r8,r7          	R0=R8%R7=0x00000000,R9=R8/R7=0x00000000,SR=0x00000060
-                sprintf(instrucao, "div r%u,r%u,r%u,r%u", i , z, x, y);
+                sprintf(instrucao, "div r%u,r%u,r%u,r%u", i, z, x, y);
                 //  R[i] = R[x] mod R[y], R[z] = R[x] ÷ R[y]
                 fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
                 break;
@@ -1306,10 +1309,10 @@ int main(int argc, char *argv[])
             }
             case 0b110:
             {
-                 z = (R[28] & (0b11111 << 21)) >> 21;
-                 x = (R[28] & (0b11111 << 16)) >> 16;
-                 y = (R[28] & (0b11111 << 11)) >> 11;
-                 i = (R[28] & (0b11111 << 0)) >> 0;
+                z = (R[28] & (0b11111 << 21)) >> 21;
+                x = (R[28] & (0b11111 << 16)) >> 16;
+                y = (R[28] & (0b11111 << 11)) >> 11;
+                i = (R[28] & (0b11111 << 0)) >> 0;
 
                 // Converta os valores para uint32_t
                 uint32_t temp_x = R[x];
@@ -1317,7 +1320,8 @@ int main(int argc, char *argv[])
                 uint32_t temp_z = R[z];
 
                 // Verifica se o divisor é zero para evitar divisão por zero
-                if (temp_y != 0) {
+                if (temp_y != 0)
+                {
                     // Calcula o resultado da divisão e do módulo
                     uint32_t result_mod = temp_x % temp_y;
                     uint32_t result_div = temp_x / temp_y;
@@ -1329,11 +1333,13 @@ int main(int argc, char *argv[])
                     // Atualização do registrador de status(SR)
                     ZN = (result_div == 0);
                     ZD = (temp_y == 0);
-                    OV = (i != 0);  // Assumindo que a flag OV está relacionada com i não sendo zero
+                    OV = (i != 0); // Assumindo que a flag OV está relacionada com i não sendo zero
 
                     // Atualiza o SR com as flags
                     SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
-                } else {
+                }
+                else
+                {
                     // Caso divisor seja zero, atualiza SR de acordo com o erro (divisão por zero)
                     fprintf(stderr, "Erro: Divisão por zero.\n");
                     SR = (SR & ~(1 << 5)) | (1 << 5); // Atualiza a flag ZD para indicar erro
