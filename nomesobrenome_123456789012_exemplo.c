@@ -220,156 +220,163 @@ int main(int argc, char *argv[])
     MEM8[114] = 0x00;
     MEM8[115] = 0x02;
     MEM32[28] = 0x52710002;
-    // // 0x56930002
-    MEM8[116] = 0x56;
-    MEM8[117] = 0x93;
-    MEM8[118] = 0x00;
-    MEM8[119] = 0x02;
-    MEM32[29] = 0x56930002;
-    // // 0x5AB30003
-    MEM8[120] = 0x5A;
-    MEM8[121] = 0xB3;
-    MEM8[122] = 0x00;
-    MEM8[123] = 0x03;
-    MEM32[30] = 0x5AB30003;
-    // // 0x5C150020
-    MEM8[124] = 0x5C;
-    MEM8[125] = 0x15;
-    MEM8[126] = 0x00;
-    MEM8[127] = 0x20;
-    MEM32[31] = 0x5C150020;
-    // // 0x62C00023
-    MEM8[128] = 0x62;
-    MEM8[129] = 0xC0;
-    MEM8[130] = 0x00;
-    MEM8[131] = 0x23;
-    MEM32[32] = 0x62C00023;
-    // // 0x66E00011
-    MEM8[132] = 0x66;
-    MEM8[133] = 0xE0;
-    MEM8[134] = 0x00;
-    MEM8[135] = 0x11;
-    MEM32[33] = 0x66E00011;
-    // // 0x6B000008
-    MEM8[136] = 0x6B;
-    MEM8[137] = 0x00;
-    MEM8[138] = 0x00;
-    MEM8[139] = 0x08;
-    MEM32[34] = 0x6B000008;
-    // // 0x6EC00023
-    MEM8[140] = 0x6E;
-    MEM8[141] = 0xC0;
-    MEM8[142] = 0x00;
-    MEM8[143] = 0x23;
-    MEM32[35] = 0x6EC00023;
-    // // 0x72E00011
-    MEM8[144] = 0x72;
-    MEM8[145] = 0xE0;
-    MEM8[146] = 0x00;
-    MEM8[147] = 0x11;
-    MEM32[36] = 0x72E00011;
-    // // 0x77000008
-    MEM8[148] = 0x77;
-    MEM8[149] = 0x00;
-    MEM8[150] = 0x00;
-    MEM8[151] = 0x08;
-    MEM32[37] = 0x77000008;
-    // // 0xA8000000
-    MEM8[152] = 0xA8;
-    MEM8[153] = 0x00;
-    MEM8[154] = 0x00;
-    MEM8[155] = 0x00;
-    MEM32[38] = 0xA8000000;
-    // // 0xAC000000
-    MEM8[156] = 0xAC;
-    MEM8[157] = 0x00;
-    MEM8[158] = 0x00;
-    MEM8[159] = 0x00;
-    MEM32[39] = 0xAC000000;
-    // // 0xB0000000
-    MEM8[160] = 0xB0;
-    MEM8[161] = 0x00;
-    MEM8[162] = 0x00;
-    MEM8[163] = 0x00;
-    MEM32[40] = 0xB0000000;
-    // // 0xB4000000
-    MEM8[164] = 0xB4;
-    MEM8[165] = 0x00;
-    MEM8[166] = 0x00;
-    MEM8[167] = 0x00;
-    MEM32[41] = 0xB4000000;
-    // // 0xB8000000
-    MEM8[168] = 0xB8;
-    MEM8[169] = 0x00;
-    MEM8[170] = 0x00;
-    MEM8[171] = 0x00;
-    MEM32[42] = 0xB8000000;
-    // // 0xBC000000
-    MEM8[172] = 0xBC;
-    MEM8[173] = 0x00;
-    MEM8[174] = 0x00;
-    MEM8[175] = 0x00;
-    MEM32[43] = 0xBC000000;
-    // // 0xC0000000
-    MEM8[176] = 0xC0;
-    MEM8[177] = 0x00;
-    MEM8[178] = 0x00;
-    MEM8[179] = 0x00;
-    MEM32[44] = 0xC0000000;
-    // // 0xC4000000
-    MEM8[180] = 0xC4;
-    MEM8[181] = 0x00;
-    MEM8[182] = 0x00;
-    MEM8[183] = 0x00;
-    MEM32[45] = 0xC4000000;
-    // // 0xC8000000
-    MEM8[184] = 0xC8;
-    MEM8[185] = 0x00;
-    MEM8[186] = 0x00;
-    MEM8[187] = 0x00;
-    MEM32[46] = 0xC8000000;
-    // // 0xCC000000
-    MEM8[188] = 0xCC;
-    MEM8[189] = 0x00;
-    MEM8[190] = 0x00;
-    MEM8[191] = 0x00;
-    MEM32[47] = 0xCC000000;
-    // // 0xD0000000
-    MEM8[192] = 0xD0;
-    MEM8[193] = 0x00;
-    MEM8[194] = 0x00;
-    MEM8[195] = 0x00;
-    MEM32[48] = 0xD0000000;
-    // // 0xD4000000
-    MEM8[196] = 0xD4;
-    MEM8[197] = 0x00;
-    MEM8[198] = 0x00;
-    MEM8[199] = 0x00;
-    MEM32[49] = 0xD4000000;
-    // // 0xD8000000
-    MEM8[200] = 0xD8;
-    MEM8[201] = 0x00;
-    MEM8[202] = 0x00;
-    MEM8[203] = 0x00;
-    MEM32[50] = 0xD8000000;
-    // // 0xDC000000
-    MEM8[204] = 0xDC;
-    MEM8[205] = 0x00;
-    MEM8[206] = 0x00;
-    MEM8[207] = 0x00;
-    MEM32[51] = 0xDC000000;
-    // // 0xE0000000
-    MEM8[208] = 0xE0;
-    MEM8[209] = 0x00;
-    MEM8[210] = 0x00;
-    MEM8[211] = 0x00;
-    MEM32[52] = 0xE0000000;
-    // 0xFC000000
+    //0xFC000000 INT
     MEM8[116] = 0xFC;
     MEM8[117] = 0x00;
     MEM8[118] = 0x00;
     MEM8[119] = 0x00;
     MEM32[29] = 0xFC000000;
+
+    // // 0x56930002
+    // MEM8[116] = 0x56;
+    // MEM8[117] = 0x93;
+    // MEM8[118] = 0x00;
+    // MEM8[119] = 0x02;
+    // MEM32[29] = 0x56930002;
+    // // 0x5AB30003
+    // MEM8[120] = 0x5A;
+    // MEM8[121] = 0xB3;
+    // MEM8[122] = 0x00;
+    // MEM8[123] = 0x03;
+    // MEM32[30] = 0x5AB30003;
+    // // // 0x5C150020
+    // MEM8[124] = 0x5C;
+    // MEM8[125] = 0x15;
+    // MEM8[126] = 0x00;
+    // MEM8[127] = 0x20;
+    // MEM32[31] = 0x5C150020;
+    // // // 0x62C00023
+    // MEM8[128] = 0x62;
+    // MEM8[129] = 0xC0;
+    // MEM8[130] = 0x00;
+    // MEM8[131] = 0x23;
+    // MEM32[32] = 0x62C00023;
+    // // // 0x66E00011
+    // MEM8[132] = 0x66;
+    // MEM8[133] = 0xE0;
+    // MEM8[134] = 0x00;
+    // MEM8[135] = 0x11;
+    // MEM32[33] = 0x66E00011;
+    // // // 0x6B000008
+    // MEM8[136] = 0x6B;
+    // MEM8[137] = 0x00;
+    // MEM8[138] = 0x00;
+    // MEM8[139] = 0x08;
+    // MEM32[34] = 0x6B000008;
+    // // // 0x6EC00023
+    // MEM8[140] = 0x6E;
+    // MEM8[141] = 0xC0;
+    // MEM8[142] = 0x00;
+    // MEM8[143] = 0x23;
+    // MEM32[35] = 0x6EC00023;
+    // // // 0x72E00011
+    // MEM8[144] = 0x72;
+    // MEM8[145] = 0xE0;
+    // MEM8[146] = 0x00;
+    // MEM8[147] = 0x11;
+    // MEM32[36] = 0x72E00011;
+    // // // 0x77000008
+    // MEM8[148] = 0x77;
+    // MEM8[149] = 0x00;
+    // MEM8[150] = 0x00;
+    // MEM8[151] = 0x08;
+    // MEM32[37] = 0x77000008;
+    // // // 0xA8000000
+    // MEM8[152] = 0xA8;
+    // MEM8[153] = 0x00;
+    // MEM8[154] = 0x00;
+    // MEM8[155] = 0x00;
+    // MEM32[38] = 0xA8000000;
+    // // // 0xAC000000
+    // MEM8[156] = 0xAC;
+    // MEM8[157] = 0x00;
+    // MEM8[158] = 0x00;
+    // MEM8[159] = 0x00;
+    // MEM32[39] = 0xAC000000;
+    // // // 0xB0000000
+    // MEM8[160] = 0xB0;
+    // MEM8[161] = 0x00;
+    // MEM8[162] = 0x00;
+    // MEM8[163] = 0x00;
+    // MEM32[40] = 0xB0000000;
+    // // // 0xB4000000
+    // MEM8[164] = 0xB4;
+    // MEM8[165] = 0x00;
+    // MEM8[166] = 0x00;
+    // MEM8[167] = 0x00;
+    // MEM32[41] = 0xB4000000;
+    // // // 0xB8000000
+    // MEM8[168] = 0xB8;
+    // MEM8[169] = 0x00;
+    // MEM8[170] = 0x00;
+    // MEM8[171] = 0x00;
+    // MEM32[42] = 0xB8000000;
+    // // // 0xBC000000
+    // MEM8[172] = 0xBC;
+    // MEM8[173] = 0x00;
+    // MEM8[174] = 0x00;
+    // MEM8[175] = 0x00;
+    // MEM32[43] = 0xBC000000;
+    // // // 0xC0000000
+    // MEM8[176] = 0xC0;
+    // MEM8[177] = 0x00;
+    // MEM8[178] = 0x00;
+    // MEM8[179] = 0x00;
+    // MEM32[44] = 0xC0000000;
+    // // // 0xC4000000
+    // MEM8[180] = 0xC4;
+    // MEM8[181] = 0x00;
+    // MEM8[182] = 0x00;
+    // MEM8[183] = 0x00;
+    // MEM32[45] = 0xC4000000;
+    // // // 0xC8000000
+    // MEM8[184] = 0xC8;
+    // MEM8[185] = 0x00;
+    // MEM8[186] = 0x00;
+    // MEM8[187] = 0x00;
+    // MEM32[46] = 0xC8000000;
+    // // // 0xCC000000
+    // MEM8[188] = 0xCC;
+    // MEM8[189] = 0x00;
+    // MEM8[190] = 0x00;
+    // MEM8[191] = 0x00;
+    // MEM32[47] = 0xCC000000;
+    // // // 0xD0000000
+    // MEM8[192] = 0xD0;
+    // MEM8[193] = 0x00;
+    // MEM8[194] = 0x00;
+    // MEM8[195] = 0x00;
+    // MEM32[48] = 0xD0000000;
+    // // // 0xD4000000
+    // MEM8[196] = 0xD4;
+    // MEM8[197] = 0x00;
+    // MEM8[198] = 0x00;
+    // MEM8[199] = 0x00;
+    // MEM32[49] = 0xD4000000;
+    // // // 0xD8000000
+    // MEM8[200] = 0xD8;
+    // MEM8[201] = 0x00;
+    // MEM8[202] = 0x00;
+    // MEM8[203] = 0x00;
+    // MEM32[50] = 0xD8000000;
+    // // // 0xDC000000
+    // MEM8[204] = 0xDC;
+    // MEM8[205] = 0x00;
+    // MEM8[206] = 0x00;
+    // MEM8[207] = 0x00;
+    // MEM32[51] = 0xDC000000;
+    // // // 0xE0000000
+    // MEM8[208] = 0xE0;
+    // MEM8[209] = 0x00;
+    // MEM8[210] = 0x00;
+    // MEM8[211] = 0x00;
+    // MEM32[52] = 0xE0000000;
+    // // 0xFC000000
+    // MEM8[116] = 0xFC;
+    // MEM8[117] = 0x00;
+    // MEM8[118] = 0x00;
+    // MEM8[119] = 0x00;
+    // MEM32[29] = 0xFC000000;
 
     // Imprimindo o conteudo das memorias em bytes
     printf("\nMEM8:\n");
@@ -711,26 +718,26 @@ int main(int argc, char *argv[])
         // subi
         case 0b010011:
         {
-        z = (R[28] >> 21) & 0b11111;
-        x = (R[28] >> 16) & 0b11111;
+            z = (R[28] >> 21) & 0b11111;
+            x = (R[28] >> 16) & 0b11111;
 
-        int32_t temp_x = (int32_t)R[x];
-        int32_t temp_i = (int32_t)(R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
+            int32_t temp_x = (int32_t)R[x];
+            int32_t temp_i = (int32_t)(R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-        int32_t temp_sum = temp_x - temp_i;
+            int32_t temp_sum = temp_x - temp_i;
 
-        R[z] = temp_sum;
+            R[z] = temp_sum;
 
-        ZN = (temp_sum == 0);                                             // Zero flag
-        SN = (temp_sum >> 31) & 1;                                        // Sign flag
-        OV = ((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0; // Overflow flag
-        CY = (temp_x < temp_i);
+            ZN = (temp_sum == 0);                                             // Zero flag
+            SN = (temp_sum >> 31) & 1;                                        // Sign flag
+            OV = ((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0; // Overflow flag
+            CY = (temp_x < temp_i);
 
-        SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
-        sprintf(instrucao, "subi r%u,r%u,%d", z, x, temp_i); // Usando %d para garantir que i seja exibido como número com sinal
-        fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, temp_i, R[z], SR);
-        break;
+            sprintf(instrucao, "subi r%u,r%u,%d", z, x, temp_i); // Usando %d para garantir que i seja exibido como número com sinal
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, temp_i, R[z], SR);
+            break;
         }
 
         // muli
@@ -752,8 +759,9 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
 
-            sprintf(instrucao, "subi r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            // formato de saída 0x00000070:	muli r19,r17,2           	R19=R17*0x00000002=0x00000002,SR=0x00000020
+            sprintf(instrucao, "muli r%u,r%u,%i", z, x, i);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u*0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
