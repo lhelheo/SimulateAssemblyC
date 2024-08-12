@@ -591,7 +591,12 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
-            sprintf(instrucao, "cmp r%u,r%u", x, y);
+            if (x == 28 && y == 29) {
+                sprintf(instrucao, "cmp ir,pc", x);
+            }
+            else {
+                sprintf(instrucao, "cmp r%u,r%u", x, y);
+            }
             fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
             break;
         }
@@ -706,37 +711,26 @@ int main(int argc, char *argv[])
         // subi
         case 0b010011:
         {
-            // printf opcode R[29]
-            printf("opcode: %08X\n", R[28]);
-            z = (R[28] >> 21) & 0b11111;
-            x = (R[28] >> 16) & 0b11111;
-            // i vai receber os 16 bits menos significativos preenchendos os demais com 0
-            i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
+        z = (R[28] >> 21) & 0b11111;
+        x = (R[28] >> 16) & 0b11111;
 
-            printf("i: %08X\n", i);
-            printf("i: %d\n", i);
+        int32_t temp_x = (int32_t)R[x];
+        int32_t temp_i = (int32_t)(R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-            int32_t temp_x = (int32_t)R[x];
-            int32_t temp_i = (int32_t)i;
+        int32_t temp_sum = temp_x - temp_i;
 
-            int32_t temp_sum = temp_x - temp_i;
+        R[z] = temp_sum;
 
-            R[z] = temp_sum;
+        ZN = (temp_sum == 0);                                             // Zero flag
+        SN = (temp_sum >> 31) & 1;                                        // Sign flag
+        OV = ((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0; // Overflow flag
+        CY = (temp_x < temp_i);
 
-            ZN = (temp_sum == 0);                                             // Zero flag
-            SN = (temp_sum >> 31) & 1;                                        // Sign flag
-            OV = ((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0; // Overflow flag
-            CY = (temp_x < temp_i);
+        SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
-            printf("x: %d\n", x);
-            printf("y: %d\n", y);
-            // print i hexadecimal 0x0000
-
-            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
-
-            sprintf(instrucao, "subi r%u,r%u,%u", z, x, i); // Usando %d para garantir que i seja exibido como número com sinal
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-%d=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
-            break;
+        sprintf(instrucao, "subi r%u,r%u,%d", z, x, temp_i); // Usando %d para garantir que i seja exibido como número com sinal
+        fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, temp_i, R[z], SR);
+        break;
         }
 
         // muli
