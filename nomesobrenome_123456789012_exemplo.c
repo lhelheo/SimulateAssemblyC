@@ -227,18 +227,20 @@ int main(int argc, char *argv[])
     MEM8[119] = 0x02;
     MEM32[29] = 0x56930002;
 
-    // 0xFC000000 INT
-    MEM8[120] = 0xFC;
-    MEM8[121] = 0x00;
+    // 0x5AB30003 MOD
+    MEM8[120] = 0x5A;
+    MEM8[121] = 0xB3;
     MEM8[122] = 0x00;
-    MEM8[123] = 0x00;
-    MEM32[30] = 0xFC000000;
-    // // 0x5AB30003
-    // MEM8[120] = 0x5A;
-    // MEM8[121] = 0xB3;
-    // MEM8[122] = 0x00;
-    // MEM8[123] = 0x03;
-    // MEM32[30] = 0x5AB30003;
+    MEM8[123] = 0x03;
+    MEM32[30] = 0x5AB30003;
+
+    // 0xFC000000 INT
+    MEM8[124] = 0xFC;
+    MEM8[125] = 0x00;
+    MEM8[126] = 0x00;
+    MEM8[127] = 0x00;
+    MEM32[31] = 0xFC000000;
+
     // // // 0x5C150020
     // MEM8[124] = 0x5C;
     // MEM8[125] = 0x15;
@@ -380,12 +382,12 @@ int main(int argc, char *argv[])
 
     // Imprimindo o conteudo das memorias em bytes
     printf("\nMEM8:\n");
-    for (uint8_t i = 0; i < 124; ++i)
+    for (uint8_t i = 0; i < 128; ++i)
     {
         printf("0x%08X: 0x%02X\n", i, MEM8[i]);
     }
     printf("\nMEM32:\n");
-    for (uint8_t i = 0; i < 31; ++i)
+    for (uint8_t i = 0; i < 32; ++i)
     {
         printf("0x%08X: 0x%08X\n", i << 2, MEM32[i]);
     }
