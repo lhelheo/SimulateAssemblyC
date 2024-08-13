@@ -220,14 +220,14 @@ int main(int argc, char *argv[])
     MEM8[114] = 0x00;
     MEM8[115] = 0x02;
     MEM32[28] = 0x52710002;
-     // 0x56930002
-     MEM8[116] = 0x56;
-     MEM8[117] = 0x93;
-     MEM8[118] = 0x00;
-     MEM8[119] = 0x02;
-     MEM32[29] = 0x56930002;
+    // 0x56930002
+    MEM8[116] = 0x56;
+    MEM8[117] = 0x93;
+    MEM8[118] = 0x00;
+    MEM8[119] = 0x02;
+    MEM32[29] = 0x56930002;
 
-    //0xFC000000 INT
+    // 0xFC000000 INT
     MEM8[120] = 0xFC;
     MEM8[121] = 0x00;
     MEM8[122] = 0x00;
@@ -598,10 +598,12 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (CY << 0);
 
-            if (x == 28 && y == 29) {
+            if (x == 28 && y == 29)
+            {
                 sprintf(instrucao, "cmp ir,pc", x);
             }
-            else {
+            else
+            {
                 sprintf(instrucao, "cmp r%u,r%u", x, y);
             }
             fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
@@ -768,23 +770,46 @@ int main(int argc, char *argv[])
         // divi
         case 0b010101:
         {
+            // Extração dos valores
             z = (R[28] & (0b11111 << 21)) >> 21;
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-            uint64_t temp_x = (uint64_t)R[x];
-            uint64_t temp_i = (uint64_t)i;
-            uint64_t temp_divi = temp_x * temp_i;
+            prinft("z: %d, x: %d, i: %d\n", z, x, i);
 
-            R[z] = (int)temp_divi;
+            // Preparação dos operandos para divisão
+            int32_t temp_x = (int32_t)R[x];
+            int32_t temp_i = (int32_t)i;
 
+            // Verificação para evitar divisão por zero
+            if (temp_i == 0)
+            {
+                // Divisão por zero não é permitida
+                temp_divi = 0; // Ou qualquer outro tratamento de erro apropriado
+                ZD = 1;        // Sinaliza divisão por zero
+                printf("Divisão por zero\n");
+            }
+            else
+            {
+                // Realiza a divisão
+                temp_divi = temp_x / temp_i;
+                ZD = 0; // Sinaliza divisão por zero não ocorreu
+                printf("Houve divisão\n");
+            }
+
+            // Atualiza o valor no registrador
+            R[z] = (int32_t)temp_divi;
+
+            // Atualiza os flags
             ZN = (temp_divi == 0);
-            SN = (temp_i == 0); // TODO: Corrigir
-            OV = 0;
+            OV = 0; // Overflow não é calculado aqui, ajustado conforme necessidade
 
-            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            // Atualiza o Status de Registro (SR)
+            SR = (ZN << 6) | (ZD << 5) | (OV << 3);
+
+            // Geração do string da instrução
             sprintf(instrucao, "divi r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u/%i=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u/0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
             break;
         }
 
