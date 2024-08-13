@@ -220,62 +220,62 @@ int main(int argc, char *argv[])
     MEM32[30] = 0x5AB30003;
 
     // 0x5C150020
-     MEM8[124] = 0x5C;
-     MEM8[125] = 0x15;
-     MEM8[126] = 0x00;
-     MEM8[127] = 0x20;
-     MEM32[31] = 0x5C150020;
+    MEM8[124] = 0x5C;
+    MEM8[125] = 0x15;
+    MEM8[126] = 0x00;
+    MEM8[127] = 0x20;
+    MEM32[31] = 0x5C150020;
     // 0x62C00023
-     MEM8[128] = 0x62;
-     MEM8[129] = 0xC0;
-     MEM8[130] = 0x00;
-     MEM8[131] = 0x23;
-     MEM32[32] = 0x62C00023;
+    MEM8[128] = 0x62;
+    MEM8[129] = 0xC0;
+    MEM8[130] = 0x00;
+    MEM8[131] = 0x23;
+    MEM32[32] = 0x62C00023;
 
     // 0x66E00011
-     MEM8[132] = 0x66;
-     MEM8[133] = 0xE0;
-     MEM8[134] = 0x00;
-     MEM8[135] = 0x11;
+    MEM8[132] = 0x66;
+    MEM8[133] = 0xE0;
+    MEM8[134] = 0x00;
+    MEM8[135] = 0x11;
     MEM32[33] = 0x66E00011;
-     // 0x6B000008
-     MEM8[136] = 0x6B;
-     MEM8[137] = 0x00;
-     MEM8[138] = 0x00;
-     MEM8[139] = 0x08;
+    // 0x6B000008
+    MEM8[136] = 0x6B;
+    MEM8[137] = 0x00;
+    MEM8[138] = 0x00;
+    MEM8[139] = 0x08;
     MEM32[34] = 0x6B000008;
-     // 0x6EC00023
-     MEM8[140] = 0x6E;
-     MEM8[141] = 0xC0;
-     MEM8[142] = 0x00;
-     MEM8[143] = 0x23;
+    // 0x6EC00023
+    MEM8[140] = 0x6E;
+    MEM8[141] = 0xC0;
+    MEM8[142] = 0x00;
+    MEM8[143] = 0x23;
     MEM32[35] = 0x6EC00023;
-     // 0x72E00011
-     MEM8[144] = 0x72;
-     MEM8[145] = 0xE0;
-     MEM8[146] = 0x00;
-     MEM8[147] = 0x11;
+    // 0x72E00011
+    MEM8[144] = 0x72;
+    MEM8[145] = 0xE0;
+    MEM8[146] = 0x00;
+    MEM8[147] = 0x11;
     MEM32[36] = 0x72E00011;
-     // 0x77000008
-     MEM8[148] = 0x77;
-     MEM8[149] = 0x00;
-     MEM8[150] = 0x00;
-     MEM8[151] = 0x08;
+    // 0x77000008
+    MEM8[148] = 0x77;
+    MEM8[149] = 0x00;
+    MEM8[150] = 0x00;
+    MEM8[151] = 0x08;
     MEM32[37] = 0x77000008;
 
-     // 0xA8000000 BAE 0
+    // 0xA8000000 BAE 0
     MEM8[152] = 0xA8;
     MEM8[153] = 0x00;
     MEM8[154] = 0x00;
     MEM8[155] = 0x00;
     MEM32[38] = 0xA8000000;
-    
+
     // // // 0xAC000000
-     MEM8[156] = 0xAC;
-     MEM8[157] = 0x00;
-     MEM8[158] = 0x00;
-     MEM8[159] = 0x00;
-     MEM32[39] = 0xAC000000;
+    MEM8[156] = 0xAC;
+    MEM8[157] = 0x00;
+    MEM8[158] = 0x00;
+    MEM8[159] = 0x00;
+    MEM32[39] = 0xAC000000;
     // // // 0xB0000000
     MEM8[160] = 0xB0;
     MEM8[161] = 0x00;
@@ -357,15 +357,17 @@ int main(int argc, char *argv[])
 
     // Imprimindo o conteudo das memorias em bytes
     printf("\nMEM8:\n");
-	for(uint8_t i = 0; i < 212; i = i + 4) {
-		// Impressao lado a lado
-		printf("0x%08X: 0x%02X 0x%02X 0x%02X 0x%02X\n", i, MEM8[i], MEM8[i + 1], MEM8[i + 2], MEM8[i + 3]);
-	}
-	printf("\nMEM32:\n");
-	for(uint8_t i = 0; i < 53; i = i + 1) {
-		// Impressao lado a lado
-		printf("0x%08X: 0x%08X (0x%02X 0x%02X 0x%02X 0x%02X)\n", i << 2, MEM32[i], ((uint8_t*)(MEM32))[(i << 2) + 3], ((uint8_t*)(MEM32))[(i << 2) + 2], ((uint8_t*)(MEM32))[(i << 2) + 1], ((uint8_t*)(MEM32))[(i << 2) + 0]);
-	}
+    for (uint8_t i = 0; i < 212; i = i + 4)
+    {
+        // Impressao lado a lado
+        printf("0x%08X: 0x%02X 0x%02X 0x%02X 0x%02X\n", i, MEM8[i], MEM8[i + 1], MEM8[i + 2], MEM8[i + 3]);
+    }
+    printf("\nMEM32:\n");
+    for (uint8_t i = 0; i < 53; i = i + 1)
+    {
+        // Impressao lado a lado
+        printf("0x%08X: 0x%08X (0x%02X 0x%02X 0x%02X 0x%02X)\n", i << 2, MEM32[i], ((uint8_t *)(MEM32))[(i << 2) + 3], ((uint8_t *)(MEM32))[(i << 2) + 2], ((uint8_t *)(MEM32))[(i << 2) + 1], ((uint8_t *)(MEM32))[(i << 2) + 0]);
+    }
 
     // Separador da saida esperada
     printf("\nSaida esperada\n\n      |       \n      V       \n\n");
@@ -469,27 +471,27 @@ int main(int argc, char *argv[])
         // l32
         case 0b011010:
         {
-              // Otendo operandos
-				z = (R[28] & (0b11111 << 21)) >> 21;
-				x = (R[28] & (0b11111 << 16)) >> 16;
-				i = R[28] & 0xFFFF;
-				// Execucao do comportamento com MEM8 e MEM32
-				R[z] = ((MEM8[((R[x] + i) << 2) + 0] << 24) |
-                 (MEM8[((R[x] + i) << 2) + 1] << 16) |
-                  (MEM8[((R[x] + i) << 2) + 2] << 8) | 
-                  (MEM8[((R[x] + i) << 2) + 3] << 0)) 
-                  | MEM32[R[x] + i];
-				// Formatacao da instrucao
-				sprintf(instrucao, "l32 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
-				// Formatacao de saida em tela (deve mudar para o arquivo de saida)
-				fprintf(output,"0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%08X\n", R[29], instrucao, z, (R[x] + i) << 2, R[z]);
-				break;
+            // Otendo operandos
+            z = (R[28] & (0b11111 << 21)) >> 21;
+            x = (R[28] & (0b11111 << 16)) >> 16;
+            i = R[28] & 0xFFFF;
+            // Execucao do comportamento com MEM8 e MEM32
+            R[z] = ((MEM8[((R[x] + i) << 2) + 0] << 24) |
+                    (MEM8[((R[x] + i) << 2) + 1] << 16) |
+                    (MEM8[((R[x] + i) << 2) + 2] << 8) |
+                    (MEM8[((R[x] + i) << 2) + 3] << 0)) |
+                   MEM32[R[x] + i];
+            // Formatacao da instrucao
+            sprintf(instrucao, "l32 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
+            // Formatacao de saida em tela (deve mudar para o arquivo de saida)
+            fprintf(output, "0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%08X\n", R[29], instrucao, z, (R[x] + i) << 2, R[z]);
+            break;
         }
 
-        // s32
-         case 0b011101: 
+            // s32
+        case 0b011101:
         {
-             uint32_t z = (R[28] & (0b11111 << 21)) >> 21;
+            uint32_t z = (R[28] & (0b11111 << 21)) >> 21;
             uint32_t x = (R[28] & (0b11111 << 16)) >> 16;
             int32_t i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
@@ -501,7 +503,7 @@ int main(int argc, char *argv[])
 
             sprintf(instrucao, "s32 [r%u%s%i],r%u", x, (i >= 0) ? "+" : "", i, z);
 
-           fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]=R%u=0x%08X\n", R[29], instrucao, (R[x] + i) << 2, z, R[z]);
+            fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]=R%u=0x%08X\n", R[29], instrucao, (R[x] + i) << 2, z, R[z]);
             break;
         }
 
@@ -527,12 +529,12 @@ int main(int argc, char *argv[])
         case 0b111111:
         {
             // Parar a execucao
-			executa = 0;
-			// Formatacao da instrucao
-			sprintf(instrucao, "int 0");
-			// Formatacao de saida em tela (deve mudar para o arquivo de saida)
-			fprintf(output,"0x%08X:\t%-25s\tCR=0x00000000,PC=0x00000000\n", R[29], instrucao);
-			break;
+            executa = 0;
+            // Formatacao da instrucao
+            sprintf(instrucao, "int 0");
+            // Formatacao de saida em tela (deve mudar para o arquivo de saida)
+            fprintf(output, "0x%08X:\t%-25s\tCR=0x00000000,PC=0x00000000\n", R[29], instrucao);
+            break;
         }
 
         // sub
@@ -773,7 +775,6 @@ int main(int argc, char *argv[])
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
 
-
             uint32_t temp_x = R[x];
             uint32_t temp_i = i;
             uint32_t temp_divi = temp_x / temp_i;
@@ -835,13 +836,14 @@ int main(int argc, char *argv[])
             uint64_t temp_cmpi = temp_x - temp_i;
 
             // Determinando os sinais e flags
-            uint32_t ZN = (temp_cmpi == 0); // Zero Flag
-            uint32_t SN = (temp_cmpi >> 31) & 1; // Sign Flag (sinal do resultado da subtração)
-            uint32_t OV = ((temp_x >> 31) != (temp_i >> 15)) && ((temp_x >> 31) != (temp_cmpi >> 31)); // Overflow Flag
-            uint32_t CY = (temp_x < temp_i); // Carry Flag
+            ZN = (temp_cmpi == 0);                                                            // Zero Flag
+            SN = (temp_cmpi >> 31) & 1;                                                       // Sign Flag (sinal do resultado da subtração)
+            OV = ((temp_x >> 31) != (temp_i >> 15)) && ((temp_x >> 31) != (temp_cmpi >> 31)); // Overflow Flag
+            CY = (temp_x < temp_i);                                                           // Carry Flag
 
             // Montagem do Status Register (SR)
-            uint32_t SR = (ZN << 6) | (SN << 4) | (OV << 3) | (CY << 0); // Considerando ZD e IV não definidos
+            SR = (ZN << 6) | (SN << 4) | (OV << 3) | (CY << 0); // Considerando ZD e IV não definidos
+            printf("carry valor %08X\n", CY);
 
             // Preparando a instrução para exibição
             sprintf(instrucao, "cmpi r%u,%u", x, i);
@@ -854,15 +856,15 @@ int main(int argc, char *argv[])
         // l16
         case 0b011001:
         {
-             // Obtendo operandos
-             z = (R[28] & (0b11111 << 21)) >> 21;
-             x = (R[28] & (0b11111 << 16)) >> 16;
-             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
+            // Obtendo operandos
+            z = (R[28] & (0b11111 << 21)) >> 21;
+            x = (R[28] & (0b11111 << 16)) >> 16;
+            i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
             // Execução do comportamento com MEM8 e MEM32
             // Leitura de 16 bits da memória
             R[z] = (MEM8[((R[x] + i) << 1) + 0] << 8) |
-                (MEM8[((R[x] + i) << 1) + 1]);
+                   (MEM8[((R[x] + i) << 1) + 1]);
 
             // Formatação da instrução
             sprintf(instrucao, "l16 r%u,[r%u%s%i]", z, x, (i >= 0) ? "+" : "", i);
@@ -873,32 +875,31 @@ int main(int argc, char *argv[])
         }
 
         case 0b101010:
-        {  
-             // Imprime o valor de SR
-            printf("SR=0x%08X\n", SR);
-            
+        { // bae
+            // Imprime se a flag é true ou false
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+
             // Verifica a condição AE (sem sinal), que significa A >= B e, portanto, CY == 0
-            if (CY == 0) 
+            if (CY == 0)
             {
-                printf("ok");
                 // Obtém o valor de i (26 bits) e estende o sinal para 32 bits
                 int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-                
+
                 // Calcula o novo valor do PC com base no deslocamento i << 2
                 uint32_t novo_PC = R[29] + 4 + (aux << 2);
-                
+
                 // Formata a instrução
                 sprintf(instrucao, "bae %i", aux);
-                
+
                 // Imprime a saída para o arquivo
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, novo_PC);
-                
+
                 // Atualiza o valor do PC
                 R[29] = novo_PC;
             }
-            else {
-                printf("nada ok");
-            }
+            sprintf(instrucao, "bae %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+
             break;
         }
 
@@ -906,32 +907,35 @@ int main(int argc, char *argv[])
         {
             // bat
             // Verifica a condição AT (sem sinal), que significa A > B, ou seja, ZN == 0 e CY == 0
-            if (ZN == 0 && CY == 0) 
+
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+
+            if (ZN == 0 && CY == 0)
             {
-                // Obtém o valor de i (26 bits) e estende o sinal para 32 bits
                 int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-
-                // Calcula o novo valor do PC com base no deslocamento i << 2
                 R[29] = R[29] + 4 + (aux << 2);
-
-                // Formata a instrução
                 sprintf(instrucao, "bat %i", aux);
-
-                // Imprime a saída para o arquivo
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
             }
+            sprintf(instrucao, "bat %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b101100:
-        {
-            // bbe
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+        { // bbe
+
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+
+            if (ZN == 0 && CY == 0)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "bat %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "bbe %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -1146,9 +1150,9 @@ int main(int argc, char *argv[])
         case 0b011011:
             // s8
             {
-                  z = (R[28] & (0b11111 << 21)) >> 21;
-                 x = (R[28] & (0b11111 << 16)) >> 16;
-                 i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
+                z = (R[28] & (0b11111 << 21)) >> 21;
+                x = (R[28] & (0b11111 << 16)) >> 16;
+                i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
                 // Execução do comportamento com MEM8
                 // Escreve 8 bits na memória
@@ -1165,9 +1169,9 @@ int main(int argc, char *argv[])
         case 0b011100:
             // s16
             {
-                  z = (R[28] & (0b11111 << 21)) >> 21;
-                 x = (R[28] & (0b11111 << 16)) >> 16;
-                 i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
+                z = (R[28] & (0b11111 << 21)) >> 21;
+                x = (R[28] & (0b11111 << 16)) >> 16;
+                i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
                 // Execução do comportamento com MEM8
                 // Escreve 16 bits na memória
@@ -1181,8 +1185,6 @@ int main(int argc, char *argv[])
                 fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]=R%u=0x%04X\n", R[29], instrucao, (R[x] + i) << 1, z, R[z] & 0xFFFF);
                 break;
             }
-
-       
 
         case 0b000100:
         {
@@ -1312,34 +1314,34 @@ int main(int argc, char *argv[])
                 //     sla r0,
                 // r2, r2 R0 = R2 << 2 = 0xFFF00000, SR = 0x00000001 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
                 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
-                fprintf(output,"0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_sla, SR);
+                fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_sla, SR);
                 break;
             }
             case 0b100:
             {
-                 z = (R[28] & (0b11111 << 21)) >> 21;
+                z = (R[28] & (0b11111 << 21)) >> 21;
                 x = (R[28] & (0b11111 << 16)) >> 16;
                 y = (R[28] & (0b11111 << 11)) >> 11;
                 i = (R[28] & (0b11111 << 0)) >> 0;
 
                 // Realização da operação de divisão
-                if (R[y] != 0)  // Verifica se o divisor não é zero
+                if (R[y] != 0) // Verifica se o divisor não é zero
                 {
-                    R[z] = R[x] / R[y];  // R[z] recebe o quociente da divisão
-                    R[i] = R[x] % R[y];  // R[i] recebe o resto da divisão
+                    R[z] = R[x] / R[y]; // R[z] recebe o quociente da divisão
+                    R[i] = R[x] % R[y]; // R[i] recebe o resto da divisão
                 }
                 else
                 {
                     // Se o divisor for zero, trate o erro conforme necessário
-                    R[z] = 0;  // Definindo R[z] como 0 em caso de erro de divisão
-                    R[i] = 0;  // Definindo R[i] como 0 em caso de erro de divisão
-                    ZD = 1;    // Flag de divisão por zero
+                    R[z] = 0; // Definindo R[z] como 0 em caso de erro de divisão
+                    R[i] = 0; // Definindo R[i] como 0 em caso de erro de divisão
+                    ZD = 1;   // Flag de divisão por zero
                 }
 
                 // Atualização do registrador de status (SR)
-                ZN = (R[z] == 0);  // ZN é 1 se o resultado for zero
-                ZD = (R[y] == 0);  // ZD é 1 se o divisor for zero
-                CY = (R[i] != 0);  // CY é 1 se o resto da divisão for diferente de zero
+                ZN = (R[z] == 0); // ZN é 1 se o resultado for zero
+                ZD = (R[y] == 0); // ZD é 1 se o divisor for zero
+                CY = (R[i] != 0); // CY é 1 se o resto da divisão for diferente de zero
 
                 SR = (ZN << 6) | (ZD << 5) | (CY << 0);
 
@@ -1347,7 +1349,7 @@ int main(int argc, char *argv[])
                 sprintf(instrucao, "div r%u,r%u,r%u,r%u", i, z, x, y);
 
                 // Saída para o arquivo
-                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", 
+                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n",
                         R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
 
                 break;
