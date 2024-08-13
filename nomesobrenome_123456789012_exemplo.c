@@ -378,12 +378,12 @@ int main(int argc, char *argv[])
 
     // Imprimindo o conteudo das memorias em bytes
     printf("\nMEM8:\n");
-    for (uint8_t i = 0; i < 156; ++i)
+    for (uint8_t i = 0; i < 152; ++i)
     {
         printf("0x%08X: 0x%02X\n", i, MEM8[i]);
     }
     printf("\nMEM32:\n");
-    for (uint8_t i = 0; i < 39 ; ++i)
+    for (uint8_t i = 0; i < 38 ; ++i)
     {
         printf("0x%08X: 0x%08X\n", i << 2, MEM32[i]);
     }
