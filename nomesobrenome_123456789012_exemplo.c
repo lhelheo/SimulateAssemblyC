@@ -843,7 +843,6 @@ int main(int argc, char *argv[])
 
             // Montagem do Status Register (SR)
             SR = (ZN << 6) | (SN << 4) | (OV << 3) | (CY << 0); // Considerando ZD e IV não definidos
-            printf("carry valor %08X\n", CY);
 
             // Preparando a instrução para exibição
             sprintf(instrucao, "cmpi r%u,%u", x, i);
@@ -878,28 +877,19 @@ int main(int argc, char *argv[])
         { // bae
             // Imprime se a flag é true ou false
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
-
             // Verifica a condição AE (sem sinal), que significa A >= B e, portanto, CY == 0
             if (CY == 0)
             {
-                // Obtém o valor de i (26 bits) e estende o sinal para 32 bits
                 int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-
-                // Calcula o novo valor do PC com base no deslocamento i << 2
-                uint32_t novo_PC = R[29] + 4 + (aux << 2);
-
-                // Formata a instrução
+                R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bae %i", aux);
-
-                // Imprime a saída para o arquivo
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, novo_PC);
-
-                // Atualiza o valor do PC
-                R[29] = novo_PC;
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
             }
-            sprintf(instrucao, "bae %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-
+            else
+            {
+                sprintf(instrucao, "bae %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            }
             break;
         }
 
@@ -917,21 +907,22 @@ int main(int argc, char *argv[])
                 sprintf(instrucao, "bat %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
             }
-            sprintf(instrucao, "bat %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            else
+            {
+                sprintf(instrucao, "bat %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            }
             break;
         }
 
         case 0b101100:
         { // bbe
-
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
-
-            if (ZN == 0 && CY == 0)
+            if (ZN == 1 || CY == 1)
             {
                 int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
                 R[29] = R[29] + 4 + (aux << 2);
-                sprintf(instrucao, "bat %i", aux);
+                sprintf(instrucao, "bbe %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
             }
             sprintf(instrucao, "bbe %i", aux);
@@ -942,48 +933,64 @@ int main(int argc, char *argv[])
         case 0b101101:
         {
             // bbt
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (CY == 1)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "bbt %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "bbt %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b101110:
         {
             // beq
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (ZN == 1)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "beq %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "beq %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b101111:
         {
             // bge
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (SN == OV)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "bge %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "bge %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110000:
         {
             // bgt
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (ZN == 0 && SN == OV)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "bgt %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "bgt %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -1002,60 +1009,80 @@ int main(int argc, char *argv[])
         case 0b110010:
         {
             // ble
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (ZN == 1 || SN != OV)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "ble %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "ble %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110011:
         {
             // blt
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (SN != OV)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "blt %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "blt %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110100:
         {
             // bne
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (ZN == 0)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "bne %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "bne %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110101:
         {
             // bni
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (IV == 0)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "bni %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "bni %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110110:
         {
             // bnz
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
+            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0) | SR;
+            if (ZD == 0)
+            {
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                R[29] = R[29] + 4 + (aux << 2);
+                sprintf(instrucao, "bnz %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             sprintf(instrucao, "bnz %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -1393,7 +1420,6 @@ int main(int argc, char *argv[])
                 // Converta os valores para uint32_t
                 uint32_t temp_x = R[x];
                 uint32_t temp_y = R[y];
-                uint32_t temp_z = R[z];
 
                 // Verifica se o divisor é zero para evitar divisão por zero
                 if (temp_y != 0)
@@ -1417,7 +1443,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     // Caso divisor seja zero, atualiza SR de acordo com o erro (divisão por zero)
-                    fprintf(stderr, "Erro: Divisão por zero.\n");
                     SR = (SR & ~(1 << 5)) | (1 << 5); // Atualiza a flag ZD para indicar erro
                 }
 
