@@ -9,21 +9,6 @@
 // Entrada/saida padrao
 #include <stdio.h>
 
-// create a potencial function that recieves the number and expoenent
-uint32_t pot(uint32_t number, uint32_t exp)
-{
-    // create a variable to store the result
-    uint32_t result = 1;
-    // iterate over the exponent
-    for (uint32_t i = 0; i < exp; i++)
-    {
-        // multiply the result by the number
-        result *= number;
-    }
-    // return the result
-    return result;
-}
-
 // Funcao principal
 int main(int argc, char *argv[])
 {
@@ -278,13 +263,13 @@ int main(int argc, char *argv[])
      MEM8[151] = 0x08;
     MEM32[37] = 0x77000008;
 
-     // 0xA8000000
+     // 0xA8000000 BAE 0
     MEM8[152] = 0xA8;
     MEM8[153] = 0x00;
     MEM8[154] = 0x00;
     MEM8[155] = 0x00;
     MEM32[38] = 0xA8000000;
-
+    
     // // // 0xAC000000
      MEM8[156] = 0xAC;
      MEM8[157] = 0x00;
@@ -369,24 +354,18 @@ int main(int argc, char *argv[])
     MEM8[210] = 0x00;
     MEM8[211] = 0x00;
     MEM32[52] = 0xE0000000;
-    // // 0xFC000000
-    MEM8[212] = 0xFC;
-    MEM8[213] = 0x00;
-    MEM8[214] = 0x00;
-    MEM8[215] = 0x00;
-    MEM32[53] = 0xFC000000;
 
     // Imprimindo o conteudo das memorias em bytes
     printf("\nMEM8:\n");
-    for (uint8_t i = 0; i < 152; ++i)
-    {
-        printf("0x%08X: 0x%02X\n", i, MEM8[i]);
-    }
-    printf("\nMEM32:\n");
-    for (uint8_t i = 0; i < 38 ; ++i)
-    {
-        printf("0x%08X: 0x%08X\n", i << 2, MEM32[i]);
-    }
+	for(uint8_t i = 0; i < 212; i = i + 4) {
+		// Impressao lado a lado
+		printf("0x%08X: 0x%02X 0x%02X 0x%02X 0x%02X\n", i, MEM8[i], MEM8[i + 1], MEM8[i + 2], MEM8[i + 3]);
+	}
+	printf("\nMEM32:\n");
+	for(uint8_t i = 0; i < 53; i = i + 1) {
+		// Impressao lado a lado
+		printf("0x%08X: 0x%08X (0x%02X 0x%02X 0x%02X 0x%02X)\n", i << 2, MEM32[i], ((uint8_t*)(MEM32))[(i << 2) + 3], ((uint8_t*)(MEM32))[(i << 2) + 2], ((uint8_t*)(MEM32))[(i << 2) + 1], ((uint8_t*)(MEM32))[(i << 2) + 0]);
+	}
 
     // Separador da saida esperada
     printf("\nSaida esperada\n\n      |       \n      V       \n\n");
@@ -417,7 +396,7 @@ int main(int argc, char *argv[])
 
         // Carregando a instrucao de 32 bits (4 bytes) da memoria indexada pelo PC
         // (R29) no registrador IR (R28) E feita a leitura redundante com MEM8 e
-        MEM32 para mostrar formas equivalentes de acesso Se X (MEM8) for igual a
+        // MEM32 para mostrar formas equivalentes de acesso Se X (MEM8) for igual a
         // Y (MEM32), entao X e Y sao iguais a X | Y (redundancia)
         R[28] = ((MEM8[R[29] + 0] << 24) | (MEM8[R[29] + 1] << 16) |
                  (MEM8[R[29] + 2] << 8) | (MEM8[R[29] + 3] << 0)) |
@@ -548,12 +527,12 @@ int main(int argc, char *argv[])
         case 0b111111:
         {
             // Parar a execucao
-            executa = 0;
-            // Formatacao da instrucao
-            sprintf(instrucao, "int 0");
-            // Formatacao de saida em tela (deve mudar para o arquivo de saida)
-            // fprintf("0x%08X:\t%-25s\tCR=0x00000000,PC=0x00000000\n", R[29], instrucao, output);
-            break;
+			executa = 0;
+			// Formatacao da instrucao
+			sprintf(instrucao, "int 0");
+			// Formatacao de saida em tela (deve mudar para o arquivo de saida)
+			fprintf(output,"0x%08X:\t%-25s\tCR=0x00000000,PC=0x00000000\n", R[29], instrucao);
+			break;
         }
 
         // sub
@@ -802,8 +781,14 @@ int main(int argc, char *argv[])
             R[z] = temp_divi;
 
             ZN = (temp_divi == 0);
-            SN = (temp_i == 0); // TODO: Corrigir
+            ZD = (temp_i == 0); // TODO: Corrigir
             OV = 0;
+
+            // se temp_i for diferente de 0 então ZD recebe 0
+            if (temp_i != 0)
+            {
+                ZD = 0;
+            }
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
 
@@ -888,26 +873,53 @@ int main(int argc, char *argv[])
         }
 
         case 0b101010:
-        {
-            // bae
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
-            sprintf(instrucao, "bae %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+        {  
+             // Imprime o valor de SR
+            printf("SR=0x%08X\n", SR);
+            
+            // Verifica a condição AE (sem sinal), que significa A >= B e, portanto, CY == 0
+            if (CY == 0) 
+            {
+                printf("ok");
+                // Obtém o valor de i (26 bits) e estende o sinal para 32 bits
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+                
+                // Calcula o novo valor do PC com base no deslocamento i << 2
+                uint32_t novo_PC = R[29] + 4 + (aux << 2);
+                
+                // Formata a instrução
+                sprintf(instrucao, "bae %i", aux);
+                
+                // Imprime a saída para o arquivo
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, novo_PC);
+                
+                // Atualiza o valor do PC
+                R[29] = novo_PC;
+            }
+            else {
+                printf("nada ok");
+            }
             break;
         }
 
         case 0b101011:
         {
             // bat
-            // PC = PC + 4 + (i(32 bits) << 2)
-            // aux vai receber os bits de 0 até 25 e os demais bits serão iguais ao bit 25
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-            R[29] = R[29] + 4 + (aux << 2);
-            sprintf(instrucao, "bat %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            // Verifica a condição AT (sem sinal), que significa A > B, ou seja, ZN == 0 e CY == 0
+            if (ZN == 0 && CY == 0) 
+            {
+                // Obtém o valor de i (26 bits) e estende o sinal para 32 bits
+                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+
+                // Calcula o novo valor do PC com base no deslocamento i << 2
+                R[29] = R[29] + 4 + (aux << 2);
+
+                // Formata a instrução
+                sprintf(instrucao, "bat %i", aux);
+
+                // Imprime a saída para o arquivo
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            }
             break;
         }
 
@@ -1300,39 +1312,44 @@ int main(int argc, char *argv[])
                 //     sla r0,
                 // r2, r2 R0 = R2 << 2 = 0xFFF00000, SR = 0x00000001 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
                 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
-                fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_sla, SR);
+                fprintf(output,"0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, result_sla, SR);
                 break;
             }
             case 0b100:
             {
-                z = (R[28] & (0b11111 << 21)) >> 21;
+                 z = (R[28] & (0b11111 << 21)) >> 21;
                 x = (R[28] & (0b11111 << 16)) >> 16;
                 y = (R[28] & (0b11111 << 11)) >> 11;
                 i = (R[28] & (0b11111 << 0)) >> 0;
 
-                // Converta os valores para int64_t
-                uint32_t temp_x = (uint32_t)R[x];
-                uint32_t temp_y = (uint32_t)R[y];
-                uint32_t temp_z = (uint32_t)R[z];
+                // Realização da operação de divisão
+                if (R[y] != 0)  // Verifica se o divisor não é zero
+                {
+                    R[z] = R[x] / R[y];  // R[z] recebe o quociente da divisão
+                    R[i] = R[x] % R[y];  // R[i] recebe o resto da divisão
+                }
+                else
+                {
+                    // Se o divisor for zero, trate o erro conforme necessário
+                    R[z] = 0;  // Definindo R[z] como 0 em caso de erro de divisão
+                    R[i] = 0;  // Definindo R[i] como 0 em caso de erro de divisão
+                    ZD = 1;    // Flag de divisão por zero
+                }
 
-                // Combina os bits em result
-                uint64_t result_mod = temp_x % temp_y;
-                uint64_t result_div = temp_x / temp_y;
+                // Atualização do registrador de status (SR)
+                ZN = (R[z] == 0);  // ZN é 1 se o resultado for zero
+                ZD = (R[y] == 0);  // ZD é 1 se o divisor for zero
+                CY = (R[i] != 0);  // CY é 1 se o resto da divisão for diferente de zero
 
-                // Isola os 32 bits mais significativos e os 32 bits menos significativos
+                SR = (ZN << 6) | (ZD << 5) | (CY << 0);
 
-                // Atualização do registrador de status(SR)
-                ZN = (R[z] == 0);
-                ZD = (R[y] == 0);
-                CY = (R[i] != 0);
-
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
                 // Formatação da instrução
-                //     sla r0,
-                // saída esperada 0x00000044:	div r0,r9,r8,r7          	R0=R8%R7=0x00000000,R9=R8/R7=0x00000000,SR=0x00000060
                 sprintf(instrucao, "div r%u,r%u,r%u,r%u", i, z, x, y);
-                //  R[i] = R[x] mod R[y], R[z] = R[x] ÷ R[y]
-                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
+
+                // Saída para o arquivo
+                fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", 
+                        R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
+
                 break;
             }
             case 0b101:
