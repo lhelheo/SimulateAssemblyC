@@ -355,15 +355,22 @@ int main(int argc, char *argv[])
     MEM8[211] = 0x00;
     MEM32[52] = 0xE0000000;
 
+    // INT 0
+    MEM8[212] = 0xFF;
+    MEM8[213] = 0x00;
+    MEM8[214] = 0x00;
+    MEM8[215] = 0x00;
+    MEM32[53] = 0xFF000000;
+
     // Imprimindo o conteudo das memorias em bytes
     printf("\nMEM8:\n");
-    for (uint8_t i = 0; i < 212; i = i + 4)
+    for (uint8_t i = 0; i < 216; i = i + 4)
     {
         // Impressao lado a lado
         printf("0x%08X: 0x%02X 0x%02X 0x%02X 0x%02X\n", i, MEM8[i], MEM8[i + 1], MEM8[i + 2], MEM8[i + 3]);
     }
     printf("\nMEM32:\n");
-    for (uint8_t i = 0; i < 53; i = i + 1)
+    for (uint8_t i = 0; i < 54; i = i + 1)
     {
         // Impressao lado a lado
         printf("0x%08X: 0x%08X (0x%02X 0x%02X 0x%02X 0x%02X)\n", i << 2, MEM32[i], ((uint8_t *)(MEM32))[(i << 2) + 3], ((uint8_t *)(MEM32))[(i << 2) + 2], ((uint8_t *)(MEM32))[(i << 2) + 1], ((uint8_t *)(MEM32))[(i << 2) + 0]);
@@ -964,194 +971,189 @@ int main(int argc, char *argv[])
         case 0b101011:
         {
             // bat
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZN == 0 && CY == 0) {
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bat %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bat %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bat %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b101100:
         { // bbe
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZN == 1 || CY == 1) {
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bbe %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bbe %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bbe %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
-        case 0b101101:
-        {
-            // bbt
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+       case 0b101101:
+        {   // bbt
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+
+            if (CY == 1) {
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bbt %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bbt %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bbt %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b101110:
-        {
-            // beq
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+        {   // beq
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+
+            if (ZN == 1) {
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "beq %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "beq %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "beq %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b101111:
         {
             // bge
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (SN == OV){
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bge %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bge %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bge %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110000:
         {
             // bgt
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZN == 0 && SN == OV){
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bgt %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bgt %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bgt %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110001:
         {
             // biv
-           
-            if (ZN == 0 && CY == 0){
                 int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "biv %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
-            }
-             sprintf(instrucao, "biv %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110010:
         {
             // ble
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZN == 1 && SN != OV){
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "ble %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "ble %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "ble %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110011:
         {
             // blt
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-                R[29] = R[29] + 4 + (aux << 2);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (SN != OV){
+                    R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "blt %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "blt %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "blt %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110100:
         {
             // bne
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZN == 0){
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bne %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bne %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bne %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110101:
         {
             // bni
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (IV == 0){
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bni %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bni %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bni %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110110:
         {
-            // bnz
-           
-            if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            // bnz  
+           int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZD == 0){
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bnz %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bnz %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bnz %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b111000:
         {
-            // bzd
-           
+            // bzd 
+           int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZN == 0 && CY == 0){
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bzd %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            } else {
+                sprintf(instrucao, "bzd %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
-             sprintf(instrucao, "bzd %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
