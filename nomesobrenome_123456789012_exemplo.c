@@ -270,31 +270,31 @@ int main(int argc, char *argv[])
     MEM8[155] = 0x00;
     MEM32[38] = 0xA8000000;
 
-    // // // 0xAC000000
+    // // // 0xAC000000 BAT
     MEM8[156] = 0xAC;
     MEM8[157] = 0x00;
     MEM8[158] = 0x00;
     MEM8[159] = 0x00;
     MEM32[39] = 0xAC000000;
-    // // // 0xB0000000
+    // // // 0xB0000000 BBE
     MEM8[160] = 0xB0;
     MEM8[161] = 0x00;
     MEM8[162] = 0x00;
     MEM8[163] = 0x00;
     MEM32[40] = 0xB0000000;
-    // // // 0xB4000000
+    // // // 0xB4000000 BBT
     MEM8[164] = 0xB4;
     MEM8[165] = 0x00;
     MEM8[166] = 0x00;
     MEM8[167] = 0x00;
-    MEM32[41] = 0xB4000000;
-    // // // 0xB8000000
+    MEM32[41] = 0xB4000000; 
+    // // // 0xB8000000 BEQ
     MEM8[168] = 0xB8;
     MEM8[169] = 0x00;
     MEM8[170] = 0x00;
     MEM8[171] = 0x00;
     MEM32[42] = 0xB8000000;
-    // // // 0xBC000000
+    // // // 0xBC000000  BGT
     MEM8[172] = 0xBC;
     MEM8[173] = 0x00;
     MEM8[174] = 0x00;
@@ -976,6 +976,7 @@ int main(int argc, char *argv[])
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bat %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+             
             } else {
                 sprintf(instrucao, "bat %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
@@ -990,9 +991,11 @@ int main(int argc, char *argv[])
                 R[29] = R[29] + 4 + (aux << 2);
                 sprintf(instrucao, "bbe %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+                   printf("Flags 1");
             } else {
                 sprintf(instrucao, "bbe %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+                   printf("Flags 2");
             }
             break;
         }
