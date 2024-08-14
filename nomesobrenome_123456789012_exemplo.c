@@ -958,15 +958,9 @@ int main(int argc, char *argv[])
             if (CY == 0) {
                 int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
                 R[29] = R[29] + (aux << 2);  // Incrementa o PC baseado em aux
-               
-                sprintf(instrucao, "bae %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                // Se a condição não for atendida, o PC apenas incrementa por 4
-                 printf("Aux: %i\n", aux << 2);
-                sprintf(instrucao, "bae %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
+            sprintf(instrucao, "bae %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -976,13 +970,9 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZN == 0 && CY == 0) {
                 R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "bat %i", aux);
+                
+            } sprintf(instrucao, "bat %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-             
-            } else {
-                sprintf(instrucao, "bat %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
@@ -991,14 +981,8 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZN == 1 || CY == 1) {
                 R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "bbe %i", aux);
+            } sprintf(instrucao, "bbe %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-                   printf("Flags 1");
-            } else {
-                sprintf(instrucao, "bbe %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-                   printf("Flags 2");
-            }
             break;
         }
 
@@ -1008,12 +992,10 @@ int main(int argc, char *argv[])
 
             if (CY == 1) {
                 R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "bbt %i", aux);
+                
+            } 
+            sprintf(instrucao, "bbt %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "bbt %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
@@ -1023,12 +1005,10 @@ int main(int argc, char *argv[])
 
             if (ZN == 1) {
                 R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "beq %i", aux);
+              
+            } 
+            sprintf(instrucao, "beq %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "beq %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
@@ -1038,12 +1018,9 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (SN == OV){
                 R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "bge %i", aux);
+            } 
+            sprintf(instrucao, "bge %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "bge %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
@@ -1053,12 +1030,9 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZN == 0 && SN == OV){
                 R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "bgt %i", aux);
+            } 
+            sprintf(instrucao, "bgt %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "bgt %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
@@ -1078,12 +1052,8 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZN == 1 && SN != OV){
                 R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "ble %i", aux);
+            } sprintf(instrucao, "ble %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "ble %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
@@ -1093,12 +1063,10 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (SN != OV){
                     R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "blt %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "blt %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             }
+                sprintf(instrucao, "blt %i", aux);
+                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+    
             break;
         }
 
@@ -1108,12 +1076,10 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZN == 0){
                 R[29] = R[29] + (aux << 2);
+            } 
                 sprintf(instrucao, "bne %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "bne %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
+            
             break;
         }
 
@@ -1123,12 +1089,11 @@ int main(int argc, char *argv[])
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (IV == 0){
                 R[29] = R[29] + (aux << 2);
+            
+            } 
                 sprintf(instrucao, "bni %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "bni %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
+    
             break;
         }
 
@@ -1138,12 +1103,10 @@ int main(int argc, char *argv[])
            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZD == 0){
                 R[29] = R[29] + (aux << 2);
+                
+            } 
                 sprintf(instrucao, "bnz %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "bnz %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
@@ -1153,12 +1116,10 @@ int main(int argc, char *argv[])
            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             if (ZN == 0 && CY == 0){
                 R[29] = R[29] + (aux << 2);
+                
+            } 
                 sprintf(instrucao, "bzd %i", aux);
                 fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            } else {
-                sprintf(instrucao, "bzd %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            }
             break;
         }
 
