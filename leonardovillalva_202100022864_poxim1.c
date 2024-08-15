@@ -1,6 +1,6 @@
 // Como executar no terminal:
-// gcc -Wall -O3 nomesobrenome_123456789012_exemplo.c -o nomesobrenome_123456789012_exemplo
-// ./nomesobrenome_123456789012_exemplo entrada.txt saida.txt
+// gcc -Wall -O3 leonardovillalva_202100022864_poxim1.c -o leonardovillalva_202100022864_poxim1
+// ./leonardovillalva_202100022864_poxim1 entrada.txt saida.txt
 
 // Numeros padronizados
 #include <stdint.h>
@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
     uint8_t ZD = 0;
     uint8_t IV = 0;
 
+    fprintf(output, "[START OF SIMULATION]\n");
+
     while (executa)
     {
         char instrucao[30] = {0};
@@ -63,20 +65,27 @@ int main(int argc, char *argv[])
         uint8_t opcode2 = (R[28] & (0b111 << 8)) >> 8;
         switch (opcode)
         {
-
         // mov
         case 0b000000:
-        {
-            z = (R[28] & (0b11111 << 21)) >> 21;
-            xyl = R[28] & 0x1FFFFF;
-            R[z] = xyl;
+				// Obtendo operandos
+				z = (R[28] & (0b11111 << 21)) >> 21;
+				xyl = R[28] & 0x1FFFFF;
+				// Execucao do comportamento
+				R[z] = xyl;
 
-            sprintf(instrucao, "mov r%u,%u", z, xyl);
-            // Formato de saída
-            // 0x00000020:	mov r1,1193046           	R1=0x00123456
-            fprintf(output, "0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
-            break;
-        }
+                
+				// Formatacao da instrucao
+                if (z == 30) {
+                    printf("SP=0x%08X\n", R[30]);
+                    sprintf(instrucao, "mov sp,%u", xyl, xyl);
+                    fprintf(output,"0x%08X:\t%-25s\tSP=0x%08X\n", R[29], instrucao, xyl);
+                }
+                else {
+                    sprintf(instrucao, "mov r%u,%u", z, xyl);
+                    fprintf(output,"0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
+                }
+				// Formatacao de saida em tela (deve mudar para o arquivo de saida)
+				break;
 
         // l8
         case 0b011000:
@@ -747,25 +756,25 @@ int main(int argc, char *argv[])
             // SP = SP - 4
             SP = SP - 4;
             PC = (R[x] + aux15) << 2;
-            sprintf(instrucao, "call [r%u+%i]", x, aux15);
+            sprintf(instrucao, "callDIFERENTE [r%u+%i]", x, aux15);
             fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, PC);
             break;
         }
 
         case 0b111001:
         { // call
-            aux = (R[28] & 0xFFFFFF) | ((R[28] & 0x800000) ? 0xFF000000 : 0x00000000);
-
-            MEM8[SP] = (PC + 4) & 0xFF;
-            MEM8[SP + 1] = ((PC + 4) >> 8) & 0xFF;
-            MEM8[SP + 2] = ((PC + 4) >> 16) & 0xFF;
-            MEM8[SP + 3] = ((PC + 4) >> 24) & 0xFF;
+            printf("SP RECEBENDO = %08X\n", z, R[30]);
+            int32_t aux = (R[28] & 0x3FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             MEM32[SP] = PC + 4;
-
+            uint32_t previous_sp = SP;
+            uint32_t previous_pc = PC;
+            
+            printf("PC = %08X\n", R[29]);
+            printf("previous pc: 0X%08X\n", previous_pc);
             SP = SP - 4;
-            PC = PC + 4 + (aux << 2);
+            PC = PC + (aux << 2);
             sprintf(instrucao, "call %d", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, PC);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", previous_pc, instrucao, PC + 4, previous_sp , MEM32[previous_sp]);
             break;
         }
 
