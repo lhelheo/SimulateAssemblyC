@@ -11,8 +11,9 @@
 
 // Funcao principal
 int main(int argc, char *argv[])
-{  
-    if (argc < 3) {
+{
+    if (argc < 3)
+    {
         fprintf(stderr, "Uso: %s <arquivo_entrada> <arquivo_saida>\n", argv[0]);
         return 1;
     }
@@ -20,7 +21,8 @@ int main(int argc, char *argv[])
     FILE *input = fopen(argv[1], "r");
     FILE *output = fopen(argv[2], "w");
 
-    if (input == NULL || output == NULL) {
+    if (input == NULL || output == NULL)
+    {
         fprintf(stderr, "Erro ao abrir arquivos.\n");
         return 1;
     }
@@ -30,7 +32,8 @@ int main(int argc, char *argv[])
     uint32_t *MEM32 = (uint32_t *)(calloc(32, 1024));
 
     uint32_t address = 0;
-    while (fscanf(input, "%x", &MEM32[address]) == 1) {
+    while (fscanf(input, "%x", &MEM32[address]) == 1)
+    {
         MEM8[address * 4] = (MEM32[address] >> 24) & 0xFF;
         MEM8[address * 4 + 1] = (MEM32[address] >> 16) & 0xFF;
         MEM8[address * 4 + 2] = (MEM32[address] >> 8) & 0xFF;
@@ -67,25 +70,26 @@ int main(int argc, char *argv[])
         {
         // mov
         case 0b000000:
-				// Obtendo operandos
-				z = (R[28] & (0b11111 << 21)) >> 21;
-				xyl = R[28] & 0x1FFFFF;
-				// Execucao do comportamento
-				R[z] = xyl;
+            // Obtendo operandos
+            z = (R[28] & (0b11111 << 21)) >> 21;
+            xyl = R[28] & 0x1FFFFF;
+            // Execucao do comportamento
+            R[z] = xyl;
 
-                
-				// Formatacao da instrucao
-                if (z == 30) {
-                    printf("SP=0x%08X\n", R[30]);
-                    sprintf(instrucao, "mov sp,%u", xyl, xyl);
-                    fprintf(output,"0x%08X:\t%-25s\tSP=0x%08X\n", R[29], instrucao, xyl);
-                }
-                else {
-                    sprintf(instrucao, "mov r%u,%u", z, xyl);
-                    fprintf(output,"0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
-                }
-				// Formatacao de saida em tela (deve mudar para o arquivo de saida)
-				break;
+            // Formatacao da instrucao
+            if (z == 30)
+            {
+                printf("SP=0x%08X\n", R[30]);
+                sprintf(instrucao, "mov sp,%u", xyl, xyl);
+                fprintf(output, "0x%08X:\t%-25s\tSP=0x%08X\n", R[29], instrucao, xyl);
+            }
+            else
+            {
+                sprintf(instrucao, "mov r%u,%u", z, xyl);
+                fprintf(output, "0x%08X:\t%-25s\tR%u=0x%08X\n", R[29], instrucao, z, xyl);
+            }
+            // Formatacao de saida em tela (deve mudar para o arquivo de saida)
+            break;
 
         // l8
         case 0b011000:
@@ -125,7 +129,8 @@ int main(int argc, char *argv[])
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -211,12 +216,12 @@ int main(int argc, char *argv[])
             OV = (((temp_x >> 31) & 1) != ((temp_y >> 31) & 1)) && (((temp_x >> 31) & 1) != ((temp_sum >> 31) & 1)) ? 1 : 0;
             CY = ((temp_sum >> 32) & 1) ? 1 : 0;
 
-
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -244,8 +249,8 @@ int main(int argc, char *argv[])
 
         case 0b000101:
         {
-            x = (R[28] >> 16) & 0b11111; 
-            y = (R[28] >> 11) & 0b11111; 
+            x = (R[28] >> 16) & 0b11111;
+            y = (R[28] >> 11) & 0b11111;
 
             uint32_t temp_x = (uint32_t)R[x];
             uint32_t temp_y = (uint32_t)R[y];
@@ -260,7 +265,8 @@ int main(int argc, char *argv[])
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -292,7 +298,8 @@ int main(int argc, char *argv[])
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -317,7 +324,8 @@ int main(int argc, char *argv[])
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -331,7 +339,7 @@ int main(int argc, char *argv[])
             z = (R[28] >> 21) & 0b11111;
             x = (R[28] >> 16) & 0b11111;
 
-            R[z] = ~R[x] & 0xFFFFFFFF; 
+            R[z] = ~R[x] & 0xFFFFFFFF;
 
             ZN = (R[z] == 0) ? 1 : 0;
             SN = ((R[z] >> 31) & 1) ? 1 : 0;
@@ -340,7 +348,8 @@ int main(int argc, char *argv[])
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -367,7 +376,8 @@ int main(int argc, char *argv[])
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
             sprintf(instrucao, "xor r%u,r%u,r%u", z, x, y);
@@ -397,7 +407,8 @@ int main(int argc, char *argv[])
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -418,20 +429,21 @@ int main(int argc, char *argv[])
 
             R[z] = temp_sum;
 
-            ZN = (temp_sum == 0) ? 1 : 0;                                             
-            SN = ((temp_sum >> 31) & 1) ? 1 : 0;                                        
-            OV = (((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0) ? 1 : 0; 
-            CY = (temp_x < temp_i) ? 1 : 0;                                             
+            ZN = (temp_sum == 0) ? 1 : 0;
+            SN = ((temp_sum >> 31) & 1) ? 1 : 0;
+            OV = (((temp_x ^ temp_i) & (temp_x ^ temp_sum) & 0x80000000) != 0) ? 1 : 0;
+            CY = (temp_x < temp_i) ? 1 : 0;
 
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
-            sprintf(instrucao, "subi r%u,r%u,%d", z, x, temp_i); 
+            sprintf(instrucao, "subi r%u,r%u,%d", z, x, temp_i);
             fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, temp_i, R[z], SR);
             break;
         }
@@ -451,19 +463,21 @@ int main(int argc, char *argv[])
 
             ZN = (temp_muli == 0) ? 1 : 0;
             SN = ((temp_muli >> 31) & 1) ? 1 : 0; // TODO: Corrigir
-            
+
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
             }
-            else {
-                if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
+            else
             {
-                SR = SR;
-            }
-            else {
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-            }
+                if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
+                {
+                    SR = SR;
+                }
+                else
+                {
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                }
             }
             sprintf(instrucao, "muli r%u,r%u,%i", z, x, i);
             fprintf(output, "0x%08X:\t%-25s\tR%u=R%u*0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
@@ -481,18 +495,20 @@ int main(int argc, char *argv[])
             int32_t temp_i = i;
             int32_t temp_divi = temp_x / temp_i;
 
-            if (i == 0){
+            if (i == 0)
+            {
                 R[z] = 0;
             }
 
-            else {
+            else
+            {
                 R[z] = temp_divi;
             }
 
             ZN = (temp_divi == 0) ? 1 : 0;
             ZD = (temp_i == 0) ? 1 : 0;
             OV = 0;
-            
+
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             sprintf(instrucao, "divi r%u,r%u,%i", z, x, i);
             fprintf(output, "0x%08X:\t%-25s\tR%u=R%u/0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
@@ -513,14 +529,15 @@ int main(int argc, char *argv[])
             R[z] = temp_modi;
 
             ZN = (R[z] == 0) ? 1 : 0;
-            SN = (temp_i == 0) ? 1 : 0; 
+            SN = (temp_i == 0) ? 1 : 0;
             OV = 0;
 
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
             sprintf(instrucao, "modi r%u,r%u,%i", z, x, i);
@@ -540,16 +557,17 @@ int main(int argc, char *argv[])
 
             uint64_t temp_cmpi = temp_x - temp_i;
 
-            ZN = (temp_cmpi == 0) ? 1 : 0;                                                           
-            SN = ((temp_cmpi >> 31) & 1) ? 1 : 0;                                                      
+            ZN = (temp_cmpi == 0) ? 1 : 0;
+            SN = ((temp_cmpi >> 31) & 1) ? 1 : 0;
             OV = ((temp_x >> 31) != (temp_i >> 15)) && ((temp_x >> 31) != (temp_cmpi >> 31)) ? 1 : 0;
-            CY = (temp_x < temp_i) ? 1 : 0;                                                           
+            CY = (temp_x < temp_i) ? 1 : 0;
 
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
             }
-            else {
+            else
+            {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             }
 
@@ -575,7 +593,8 @@ int main(int argc, char *argv[])
 
         case 0b101010:
         { // bae
-            if (CY == 0) {
+            if (CY == 0)
+            {
                 int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
                 R[29] = R[29] + (aux << 2);
             }
@@ -588,10 +607,10 @@ int main(int argc, char *argv[])
         {
             // bat
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (ZN == 0 && CY == 0) {
+            if (ZN == 0 && CY == 0)
+            {
                 R[29] = R[29] + (aux << 2);
-                
-            } 
+            }
             sprintf(instrucao, "bat %i", aux);
             fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
@@ -600,35 +619,37 @@ int main(int argc, char *argv[])
         case 0b101100:
         { // bbe
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (ZN == 1 || CY == 1) {
+            if (ZN == 1 || CY == 1)
+            {
                 R[29] = R[29] + (aux << 2);
-            } 
+            }
             sprintf(instrucao, "bbe %i", aux);
             fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
-       case 0b101101:
-        {   // bbt
+        case 0b101101:
+        { // bbt
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (CY == 1) {
+            if (CY == 1)
+            {
                 R[29] = R[29] + (aux << 2);
-            } 
+            }
             sprintf(instrucao, "bbt %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b101110:
-        {   // beq
+        { // beq
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
 
-            if (ZN == 1) {
+            if (ZN == 1)
+            {
                 R[29] = R[29] + (aux << 2);
-              
-            } 
+            }
             sprintf(instrucao, "beq %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -636,11 +657,12 @@ int main(int argc, char *argv[])
         {
             // bge
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (SN == OV){
+            if (SN == OV)
+            {
                 R[29] = R[29] + (aux << 2);
-            } 
+            }
             sprintf(instrucao, "bge %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -648,21 +670,22 @@ int main(int argc, char *argv[])
         {
             // bgt
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (ZN == 0 && SN == OV){
+            if (ZN == 0 && SN == OV)
+            {
                 R[29] = R[29] + (aux << 2);
-            } 
+            }
             sprintf(instrucao, "bgt %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b110001:
         {
             // biv
-                int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-                R[29] = R[29] + (aux << 2);
-                sprintf(instrucao, "biv %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            R[29] = R[29] + (aux << 2);
+            sprintf(instrucao, "biv %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -670,10 +693,12 @@ int main(int argc, char *argv[])
         {
             // ble
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (ZN == 1 && SN != OV){
+            if (ZN == 1 && SN != OV)
+            {
                 R[29] = R[29] + (aux << 2);
-            } sprintf(instrucao, "ble %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            }
+            sprintf(instrucao, "ble %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -681,12 +706,13 @@ int main(int argc, char *argv[])
         {
             // blt
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (SN != OV){
-                    R[29] = R[29] + (aux << 2);
+            if (SN != OV)
+            {
+                R[29] = R[29] + (aux << 2);
             }
-                sprintf(instrucao, "blt %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-    
+            sprintf(instrucao, "blt %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+
             break;
         }
 
@@ -694,12 +720,13 @@ int main(int argc, char *argv[])
         {
             // bne
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (ZN == 0){
+            if (ZN == 0)
+            {
                 R[29] = R[29] + (aux << 2);
-            } 
-                sprintf(instrucao, "bne %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-            
+            }
+            sprintf(instrucao, "bne %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+
             break;
         }
 
@@ -707,39 +734,39 @@ int main(int argc, char *argv[])
         {
             // bni
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (IV == 0){
+            if (IV == 0)
+            {
                 R[29] = R[29] + (aux << 2);
-            
-            } 
-                sprintf(instrucao, "bni %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
-    
+            }
+            sprintf(instrucao, "bni %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+
             break;
         }
 
         case 0b110110:
         {
-            // bnz  
-           int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (ZD == 0){
+            // bnz
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZD == 0)
+            {
                 R[29] = R[29] + (aux << 2);
-                
-            } 
-                sprintf(instrucao, "bnz %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            }
+            sprintf(instrucao, "bnz %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
         case 0b111000:
         {
-            // bzd 
-           int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            if (ZN == 0 && CY == 0){
+            // bzd
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
+            if (ZN == 0 && CY == 0)
+            {
                 R[29] = R[29] + (aux << 2);
-                
-            } 
-                sprintf(instrucao, "bzd %i", aux);
-                fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
+            }
+            sprintf(instrucao, "bzd %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29] + 4);
             break;
         }
 
@@ -763,18 +790,19 @@ int main(int argc, char *argv[])
 
         case 0b111001:
         { // call
-            printf("SP RECEBENDO = %08X\n", z, R[30]);
+            printf("SP RECEBENDO = %08X\n", z, SP);
+            printf("PC RECEBENDO = %08X\n", x, PC);
             int32_t aux = (R[28] & 0x3FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             MEM32[SP] = PC + 4;
             uint32_t previous_sp = SP;
             uint32_t previous_pc = PC;
-            
+
             printf("PC = %08X\n", R[29]);
             printf("previous pc: 0X%08X\n", previous_pc);
             SP = SP - 4;
             PC = PC + (aux << 2);
             sprintf(instrucao, "call %d", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", previous_pc, instrucao, PC + 4, previous_sp , MEM32[previous_sp]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", previous_pc, instrucao, PC + 4, previous_sp, MEM32[previous_sp]);
             break;
         }
 
@@ -782,10 +810,10 @@ int main(int argc, char *argv[])
         {
             // ret
             SP = SP + 4;
-            uint32_t pc_low = MEM8[SP];           
-            uint32_t pc_byte1 = MEM8[SP + 1];     
-            uint32_t pc_byte2 = MEM8[SP + 2];     
-            uint32_t pc_high = MEM8[SP + 3];     
+            uint32_t pc_low = MEM8[SP];
+            uint32_t pc_byte1 = MEM8[SP + 1];
+            uint32_t pc_byte2 = MEM8[SP + 2];
+            uint32_t pc_high = MEM8[SP + 3];
 
             PC = (pc_high << 24) | (pc_byte2 << 16) | (pc_byte1 << 8) | pc_low;
             sprintf(instrucao, "ret");
@@ -799,79 +827,91 @@ int main(int argc, char *argv[])
             uint32_t valores_empilhados[6];
             int num_registradores = 0;
 
-            for (int reg = i; reg <= 25; reg++) {
-                if (reg != 0) {
+            for (int reg = i; reg <= 25; reg++)
+            {
+                if (reg != 0)
+                {
                     MEM32[SP] = R[reg];
                     valores_empilhados[num_registradores++] = R[reg];
                     SP = SP - 4;
                 }
             }
 
-            sprintf(instrucao, "push r%u,r%u,r%u,r%u,r%u,r%u", i, i+1, i+2, i+3, i+4, i+5);
+            sprintf(instrucao, "push r%u,r%u,r%u,r%u,r%u,r%u", i, i + 1, i + 2, i + 3, i + 4, i + 5);
             fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]={", R[29], instrucao, SP + 4 * num_registradores);
 
-            for (int j = 0; j < num_registradores; j++) {
+            for (int j = 0; j < num_registradores; j++)
+            {
                 fprintf(output, "0x%08X", valores_empilhados[j]);
-                if (j < num_registradores - 1) {
+                if (j < num_registradores - 1)
+                {
                     fprintf(output, ",");
                 }
             }
 
-                fprintf(output, "}={");
+            fprintf(output, "}={");
 
-                for (int j = i; j < i + num_registradores; j++) {
-                    fprintf(output, "R%u", j);
-                    if (j < i + num_registradores - 1) {
-                        fprintf(output, ",");
-                    }
+            for (int j = i; j < i + num_registradores; j++)
+            {
+                fprintf(output, "R%u", j);
+                if (j < i + num_registradores - 1)
+                {
+                    fprintf(output, ",");
                 }
+            }
 
-                fprintf(output, "}\n");
+            fprintf(output, "}\n");
 
-                break;
+            break;
         }
 
         case 0b001011:
         {
-                uint8_t i = (R[28] >> 20) & 0x3F;
-                uint32_t valores_desempilhados[6];
-                int num_registradores = 0;
+            uint8_t i = (R[28] >> 20) & 0x3F;
+            uint32_t valores_desempilhados[6];
+            int num_registradores = 0;
 
-                for (int reg = i; reg <= 25; reg++) {
-                    if (reg != 0) {
-                        SP = SP + 4;
-                        R[reg] = MEM32[SP];
-                        valores_desempilhados[num_registradores++] = R[reg];
-                    }
+            for (int reg = i; reg <= 25; reg++)
+            {
+                if (reg != 0)
+                {
+                    SP = SP + 4;
+                    R[reg] = MEM32[SP];
+                    valores_desempilhados[num_registradores++] = R[reg];
                 }
+            }
 
-                sprintf(instrucao, "pop r%u,r%u,r%u,r%u,r%u,r%u", i, i+1, i+2, i+3, i+4, i+5);
-                fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]={", R[29], instrucao, SP - 4 * num_registradores);
+            sprintf(instrucao, "pop r%u,r%u,r%u,r%u,r%u,r%u", i, i + 1, i + 2, i + 3, i + 4, i + 5);
+            fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]={", R[29], instrucao, SP - 4 * num_registradores);
 
-                for (int j = 0; j < num_registradores; j++) {
-                    fprintf(output, "0x%08X", valores_desempilhados[j]);
-                    if (j < num_registradores - 1) {
-                        fprintf(output, ",");
-                    }
+            for (int j = 0; j < num_registradores; j++)
+            {
+                fprintf(output, "0x%08X", valores_desempilhados[j]);
+                if (j < num_registradores - 1)
+                {
+                    fprintf(output, ",");
                 }
+            }
 
-                fprintf(output, "}={");
+            fprintf(output, "}={");
 
-                for (int j = i; j < i + num_registradores; j++) {
-                    fprintf(output, "R%u", j);
-                    if (j < i + num_registradores - 1) {
-                        fprintf(output, ",");
-                    }
+            for (int j = i; j < i + num_registradores; j++)
+            {
+                fprintf(output, "R%u", j);
+                if (j < i + num_registradores - 1)
+                {
+                    fprintf(output, ",");
                 }
+            }
 
-                fprintf(output, "}\n");
+            fprintf(output, "}\n");
 
-                break;
+            break;
         }
 
         case 0b011011:
             // s8
-            {   
+            {
                 z = (R[28] & (0b11111 << 21)) >> 21;
                 x = (R[28] & (0b11111 << 16)) >> 16;
                 i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
@@ -920,13 +960,15 @@ int main(int argc, char *argv[])
 
                 ZN = (result_mul == 0) ? 1 : 0;
                 OV = (R[i] != 0) ? 1 : 0;
-    
-                if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0){
+
+                if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
+                {
                     SR = SR;
                 }
-                else {
+                else
+                {
                     SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-                }                
+                }
                 sprintf(instrucao, "mul r%u,r%u,r%u,r%u", i, z, x, y);
                 fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u*R%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, i, z, x, y, ((uint64_t)R[i] << 32) | (uint64_t)R[z], SR);
                 break;
@@ -953,12 +995,13 @@ int main(int argc, char *argv[])
                 OV = (R[z] != 0) ? 1 : 0;
 
                 if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
-            {
-                SR = SR;
-            }
-            else {
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-            }
+                {
+                    SR = SR;
+                }
+                else
+                {
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                }
                 sprintf(instrucao, "sll r%u,r%u,r%u,%u", z, x, y, i);
                 fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, ((uint64_t)R[z] << 32) | (uint64_t)R[x], SR);
                 break;
@@ -974,19 +1017,20 @@ int main(int argc, char *argv[])
                 uint32_t operand_muls_y = (uint32_t)R[y];
                 int64_t result_muls = operand_muls_x * operand_muls_y;
 
-                R[i] = (int32_t)(result_muls >> 32);        
+                R[i] = (int32_t)(result_muls >> 32);
                 R[z] = (int32_t)(result_muls & 0xFFFFFFFF);
 
                 ZN = (R[z] == 0) ? 1 : 0;
                 OV = ((result_muls >> 32) != 0) ? 1 : 0;
 
                 if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
-            {
-                SR = SR;
-            }
-            else {
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-            }
+                {
+                    SR = SR;
+                }
+                else
+                {
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                }
                 sprintf(instrucao, "muls r%u,r%u,r%u,r%u", i, z, x, y);
                 fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u*R%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, i, z, x, y, ((int64_t)R[i] << 32) | (int64_t)R[z], SR);
                 break;
@@ -1013,12 +1057,13 @@ int main(int argc, char *argv[])
                 OV = (high_bits != 0) ? 1 : 0;
 
                 if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
-            {
-                SR = SR;
-            }
-            else {
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-            }
+                {
+                    SR = SR;
+                }
+                else
+                {
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                }
                 sprintf(instrucao, "sla r%u,r%u,r%u,%u", z, x, y, i);
                 fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u<<%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, ((int64_t)R[z] << 32) | (int64_t)R[x], SR);
                 break;
@@ -1032,25 +1077,26 @@ int main(int argc, char *argv[])
 
                 if (R[y] != 0)
                 {
-                    R[z] = R[x] / R[y]; 
-                    R[i] = R[x] % R[y]; 
+                    R[z] = R[x] / R[y];
+                    R[i] = R[x] % R[y];
                 }
                 else
                 {
-                    R[z] = 0; 
+                    R[z] = 0;
                     R[i] = 0;
-                    ZD = 1;   
+                    ZD = 1;
                 }
 
-                ZN = (R[z] == 0) ? 1 : 0; 
+                ZN = (R[z] == 0) ? 1 : 0;
                 ZD = (R[y] == 0) ? 1 : 0;
-                CY = (R[i] != 0) ? 1 : 0; 
+                CY = (R[i] != 0) ? 1 : 0;
 
                 if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
                 {
                     SR = SR;
                 }
-                else {
+                else
+                {
                     SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
                 }
 
@@ -1077,12 +1123,13 @@ int main(int argc, char *argv[])
                 OV = (result_srl != 0) ? 1 : 0;
 
                 if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
-            {
-                SR = SR;
-            }
-            else {
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-            }
+                {
+                    SR = SR;
+                }
+                else
+                {
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                }
                 sprintf(instrucao, "srl r%u,r%u,r%u,%u", z, x, y, i);
                 fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u>>%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, ((uint64_t)R[z] << 32) | (uint64_t)R[x], SR);
                 break;
@@ -1106,21 +1153,22 @@ int main(int argc, char *argv[])
 
                     ZN = (result_div == 0) ? 1 : 0;
                     ZD = (temp_y == 0) ? 1 : 0;
-                    OV = (i != 0) ? 1 : 0; 
+                    OV = (i != 0) ? 1 : 0;
                 }
                 else
                 {
-                    R[z] = 0; 
+                    R[z] = 0;
                     R[i] = 0;
-                    ZD = 1; 
+                    ZD = 1;
                 }
-                    if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
-                    {
-                        SR = SR;
-                    }
-                    else {
-                        SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-                    }
+                if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
+                {
+                    SR = SR;
+                }
+                else
+                {
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                }
                 sprintf(instrucao, "divs r%u,r%u,r%u,r%u", i, z, x, y);
                 fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%R%u=0x%08X,R%u=R%u/R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, i, x, y, R[i], z, x, y, R[z], SR);
                 break;
@@ -1139,12 +1187,14 @@ int main(int argc, char *argv[])
                 ZN = (R[z] == 0) ? 1 : 0;
                 OV = (R[z] != 0) ? 1 : 0;
 
-            if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0){
-                SR = SR;
-            }
-            else {
-                SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
-            }   
+                if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
+                {
+                    SR = SR;
+                }
+                else
+                {
+                    SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                }
                 sprintf(instrucao, "sra r%u,r%u,r%u,%u", z, x, y, i);
                 fprintf(output, "0x%08X:\t%-25s\tR%u:R%u=R%u:R%u>>%u=0x%016llX,SR=0x%08X\n", R[29], instrucao, z, x, z, y, i + 1, ((int64_t)R[z] << 32) | (int64_t)R[x], SR);
                 break;
