@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
             // Formatacao da instrucao
             if (z == 30)
             {
-                printf("SP=0x%08X\n", R[30]);
+                printf("SP=0x%08X\n", R[z]);
                 sprintf(instrucao, "mov sp,%u", xyl, xyl);
                 fprintf(output, "0x%08X:\t%-25s\tSP=0x%08X\n", R[29], instrucao, xyl);
             }
@@ -790,14 +790,16 @@ int main(int argc, char *argv[])
 
         case 0b111001:
         { // call
-            printf("SP RECEBENDO = %08X\n", z, SP);
-            printf("PC RECEBENDO = %08X\n", x, PC);
+            printf("SP RECEBENDO = %08X\n", R[30]);
+            printf("PC RECEBENDO = %08X\n", R[29]);
             int32_t aux = (R[28] & 0x3FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            MEM32[SP] = PC + 4;
-            uint32_t previous_sp = SP;
-            uint32_t previous_pc = PC;
+            MEM32[R[29]] = R[28] + 4;
+            uint32_t previous_sp;
+            uint32_t previous_pc;
 
-            printf("PC = %08X\n", R[29]);
+            previous_pc = R[28];
+            previous_sp = R[29];
+
             printf("previous pc: 0X%08X\n", previous_pc);
             SP = SP - 4;
             PC = PC + (aux << 2);
