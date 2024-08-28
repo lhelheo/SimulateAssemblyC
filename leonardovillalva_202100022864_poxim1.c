@@ -28,16 +28,15 @@ int main(int argc, char *argv[])
     }
 
     uint32_t R[32] = {0};
-    uint8_t *MEM8 = (uint8_t *)(calloc(32, 1024));
     uint32_t *MEM32 = (uint32_t *)(calloc(32, 1024));
 
     uint32_t address = 0;
     while (fscanf(input, "%x", &MEM32[address]) == 1)
     {
-        MEM8[address * 4] = (MEM32[address] >> 24) & 0xFF;
-        MEM8[address * 4 + 1] = (MEM32[address] >> 16) & 0xFF;
-        MEM8[address * 4 + 2] = (MEM32[address] >> 8) & 0xFF;
-        MEM8[address * 4 + 3] = MEM32[address] & 0xFF;
+        (MEM32[address] >> 24) & 0xFF;
+        (MEM32[address] >> 16) & 0xFF;
+        (MEM32[address] >> 8) & 0xFF;
+        MEM32[address] & 0xFF;
         address++;
     }
 
@@ -61,9 +60,7 @@ int main(int argc, char *argv[])
         uint8_t z = 0, x = 0, i = 0, y = 0;
         uint32_t pc = 0, xyl = 0, aux = 0;
         R[0] = 0;
-        R[28] = ((MEM8[R[29] + 0] << 24) | (MEM8[R[29] + 1] << 16) |
-                 (MEM8[R[29] + 2] << 8) | (MEM8[R[29] + 3] << 0)) |
-                MEM32[R[29] >> 2];
+        R[28] = MEM32[R[29] >> 2];
         uint8_t opcode = (R[28] & (0b111111 << 26)) >> 26;
         uint8_t opcode2 = (R[28] & (0b111 << 8)) >> 8;
         switch (opcode)
@@ -98,7 +95,7 @@ int main(int argc, char *argv[])
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = R[28] & 0xFFFF;
             // Execucao do comportamento com MEM8 e MEM32
-            R[z] = MEM8[R[x] + i] | (((uint8_t *)(MEM32))[(R[x] + i) >> 2]);
+            R[z] = (((uint8_t *)(MEM32))[(R[x] + i) >> 2]);
             // Formatacao da instrucao
             sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
             // formato de saída 0x00000080:	l8 r22,[r0+35]           	R22=MEM[0x00000023]=0x56
@@ -148,11 +145,7 @@ int main(int argc, char *argv[])
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = R[28] & 0xFFFF;
             // Execucao do comportamento com MEM8 e MEM32
-            R[z] = ((MEM8[((R[x] + i) << 2) + 0] << 24) |
-                    (MEM8[((R[x] + i) << 2) + 1] << 16) |
-                    (MEM8[((R[x] + i) << 2) + 2] << 8) |
-                    (MEM8[((R[x] + i) << 2) + 3] << 0)) |
-                   MEM32[R[x] + i];
+            R[z] = MEM32[R[x] + i];
             // Formatacao da instrucao
             sprintf(instrucao, "l32 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
             // Formatacao de saida em tela (deve mudar para o arquivo de saida)
@@ -167,10 +160,6 @@ int main(int argc, char *argv[])
             uint32_t x = (R[28] & (0b11111 << 16)) >> 16;
             int32_t i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
-            MEM8[((R[x] + i) << 2) + 0] = (R[z] >> 24) & 0xFF;
-            MEM8[((R[x] + i) << 2) + 1] = (R[z] >> 16) & 0xFF;
-            MEM8[((R[x] + i) << 2) + 2] = (R[z] >> 8) & 0xFF;
-            MEM8[((R[x] + i) << 2) + 3] = R[z] & 0xFF;
             MEM32[R[x] + i] = R[z];
 
             sprintf(instrucao, "s32 [r%u%s%i],r%u", x, (i >= 0) ? "+" : "", i, z);
@@ -608,8 +597,7 @@ int main(int argc, char *argv[])
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
-            R[z] = (MEM8[((R[x] + i) << 1) + 0] << 8) |
-                   (MEM8[((R[x] + i) << 1) + 1]);
+            R[z] = (MEM32[(R[x] + i) >> 2] >> ((R[x] + i) % 4) * 8) & 0xFFFF;
 
             sprintf(instrucao, "l16 r%u,[r%u%s%i]", z, x, (i >= 0) ? "+" : "", i);
             fprintf(output, "0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%04X\n", R[29], instrucao, z, (R[x] + i) << 1, R[z]);
@@ -941,7 +929,7 @@ int main(int argc, char *argv[])
                 z = (R[28] & (0b11111 << 21)) >> 21;
                 x = (R[28] & (0b11111 << 16)) >> 16;
                 i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
-                MEM8[R[x] + i] = R[z] & 0xFF;
+                MEM32[R[x] + i] = R[z] & 0xFF;
 
                 sprintf(instrucao, "s8 [r%u%s%i],r%u", x, (i >= 0) ? "+" : "", i, z);
                 fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]=R%u=0x%02X\n", R[29], instrucao, R[x] + i, z, R[z] & 0xFF);
@@ -954,8 +942,7 @@ int main(int argc, char *argv[])
                 z = (R[28] & (0b11111 << 21)) >> 21;
                 x = (R[28] & (0b11111 << 16)) >> 16;
                 i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
-                MEM8[((R[x] + i) << 1) + 0] = (R[z] >> 8) & 0xFF;
-                MEM8[((R[x] + i) << 1) + 1] = R[z] & 0xFF;
+                MEM32[((R[x] + i) << 1) + 0] = (R[z] >> 8) & 0xFF;
 
                 sprintf(instrucao, "s16 [r%u%s%i],r%u", x, (i >= 0) ? "+" : "", i, z);
                 fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]=R%u=0x%04X\n", R[29], instrucao, (R[x] + i) << 1, z, R[z] & 0xFFFF);
@@ -1245,7 +1232,6 @@ int main(int argc, char *argv[])
     fclose(input);
     fclose(output);
     // Finalizando programa
-    free(MEM8);
     free(MEM32);
     return 0;
 }
