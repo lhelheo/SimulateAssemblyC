@@ -127,14 +127,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "add r%u,r%u,r%u", z, x, y);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], R[31]);
             break;
         }
 
@@ -218,14 +220,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "sub r%u,r%u,r%u", z, x, y);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], R[31]);
             break;
         }
 
@@ -263,10 +267,12 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             if (x == 28 && y == 29)
@@ -277,7 +283,7 @@ int main(int argc, char *argv[])
             {
                 sprintf(instrucao, "cmp r%u,r%u", x, y);
             }
-            fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
+            fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, R[31]);
             break;
         }
 
@@ -296,14 +302,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "and r%u,r%u,r%u", z, x, y);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u&R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u&R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], R[31]);
             break;
         }
 
@@ -322,14 +330,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "or r%u,r%u,r%u", z, x, y);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u|R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u|R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], R[31]);
             break;
         }
 
@@ -346,14 +356,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "not r%u,r%u", z, x);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=~R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=~R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, R[z], R[31]);
             break;
         }
 
@@ -374,13 +386,15 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
             sprintf(instrucao, "xor r%u,r%u,r%u", z, x, y);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u^R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u^R%u=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, y, R[z], R[31]);
             break;
         }
 
@@ -405,14 +419,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "addi r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u+0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], R[31]);
             break;
         }
 
@@ -436,14 +452,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "subi r%u,r%u,%d", z, x, temp_i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, temp_i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u-0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, temp_i, R[z], R[31]);
             break;
         }
 
@@ -472,14 +490,16 @@ int main(int argc, char *argv[])
                 if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
                 {
                     SR = SR;
+                    R[31] = SR;
                 }
                 else
                 {
                     SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                    R[31] = SR;
                 }
             }
             sprintf(instrucao, "muli r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u*0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u*0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], R[31]);
             break;
         }
 
@@ -497,11 +517,13 @@ int main(int argc, char *argv[])
             if (i == 0)
             {
                 R[z] = 0;
+                R[31] = SR;
             }
 
             else
             {
                 R[z] = temp_divi;
+                R[31] = SR;
             }
 
             ZN = (temp_divi == 0) ? 1 : 0;
@@ -510,7 +532,7 @@ int main(int argc, char *argv[])
 
             SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
             sprintf(instrucao, "divi r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u/0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u/0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], R[31]);
             break;
         }
 
@@ -534,13 +556,15 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
             sprintf(instrucao, "modi r%u,r%u,%i", z, x, i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%0x%08x=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], SR);
+            fprintf(output, "0x%08X:\t%-25s\tR%u=R%u%%0x%08x=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], R[31]);
             break;
         }
 
@@ -564,14 +588,16 @@ int main(int argc, char *argv[])
             if (ZN == 0 && ZD == 0 && SN == 0 && OV == 0 && IV == 0 && CY == 0)
             {
                 SR = SR;
+                R[31] = SR;
             }
             else
             {
                 SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+                R[31] = SR;
             }
 
             sprintf(instrucao, "cmpi r%u,%u", x, i);
-            fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, SR);
+            fprintf(output, "0x%08X:\t%-25s\tSR=0x%08X\n", R[29], instrucao, R[31]);
             break;
         }
 
@@ -799,6 +825,8 @@ int main(int argc, char *argv[])
             sprintf(instrucao, "call %i", aux);
             // PC=0x00000020,MEM[0x00007FFC]=0x000002C0
             fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", R[29], instrucao, R[29] + 4 + (aux << 2), R[30], memSP);
+
+            // R[29] = R[29] + (aux << 2);
             break;
         }
 
