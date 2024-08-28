@@ -17,10 +17,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Uso: %s <arquivo_entrada> <arquivo_saida>\n", argv[0]);
         return 1;
     }
-
     FILE *input = fopen(argv[1], "r");
     FILE *output = fopen(argv[2], "w");
-
     if (input == NULL || output == NULL)
     {
         fprintf(stderr, "Erro ao abrir arquivos.\n");
@@ -28,16 +26,15 @@ int main(int argc, char *argv[])
     }
 
     uint32_t R[32] = {0};
-    uint8_t *MEM8 = (uint8_t *)(calloc(32, 1024));
     uint32_t *MEM32 = (uint32_t *)(calloc(32, 1024));
 
     uint32_t address = 0;
     while (fscanf(input, "%x", &MEM32[address]) == 1)
     {
-        MEM8[address * 4] = (MEM32[address] >> 24) & 0xFF;
-        MEM8[address * 4 + 1] = (MEM32[address] >> 16) & 0xFF;
-        MEM8[address * 4 + 2] = (MEM32[address] >> 8) & 0xFF;
-        MEM8[address * 4 + 3] = MEM32[address] & 0xFF;
+        (MEM32[address] >> 24) & 0xFF;
+        (MEM32[address] >> 16) & 0xFF;
+        (MEM32[address] >> 8) & 0xFF;
+        MEM32[address] & 0xFF;
         address++;
     }
 
@@ -52,7 +49,6 @@ int main(int argc, char *argv[])
     uint8_t CY = 0;
     uint8_t ZD = 0;
     uint8_t IV = 0;
-
     fprintf(output, "[START OF SIMULATION]\n");
 
     while (executa)
@@ -61,9 +57,7 @@ int main(int argc, char *argv[])
         uint8_t z = 0, x = 0, i = 0, y = 0;
         uint32_t pc = 0, xyl = 0, aux = 0;
         R[0] = 0;
-        R[28] = ((MEM8[R[29] + 0] << 24) | (MEM8[R[29] + 1] << 16) |
-                 (MEM8[R[29] + 2] << 8) | (MEM8[R[29] + 3] << 0)) |
-                MEM32[R[29] >> 2];
+        R[28] = MEM32[R[29] >> 2];
         uint8_t opcode = (R[28] & (0b111111 << 26)) >> 26;
         uint8_t opcode2 = (R[28] & (0b111 << 8)) >> 8;
         switch (opcode)
@@ -97,8 +91,8 @@ int main(int argc, char *argv[])
             z = (R[28] & (0b11111 << 21)) >> 21;
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = R[28] & 0xFFFF;
-            // Execucao do comportamento com MEM8 e MEM32
-            R[z] = MEM8[R[x] + i] | (((uint8_t *)(MEM32))[(R[x] + i) >> 2]);
+            // Execucao do comportamento com MEM32
+            R[z] = MEM32[R[x] + i];
             // Formatacao da instrucao
             sprintf(instrucao, "l8 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
             // formato de saída 0x00000080:	l8 r22,[r0+35]           	R22=MEM[0x00000023]=0x56
@@ -118,7 +112,6 @@ int main(int argc, char *argv[])
             uint64_t temp_sum = temp_x + temp_y;
 
             R[z] = temp_sum;
-
             ZN = (temp_sum == 0) ? 1 : 0;
             SN = ((temp_sum >> 31) & 1) ? 1 : 0;
             OV = ((temp_x >> 31) & (temp_y >> 31) & !((temp_sum >> 31) & (temp_x >> 31)) ? 1 : 0);
@@ -148,11 +141,7 @@ int main(int argc, char *argv[])
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = R[28] & 0xFFFF;
             // Execucao do comportamento com MEM8 e MEM32
-            R[z] = ((MEM8[((R[x] + i) << 2) + 0] << 24) |
-                    (MEM8[((R[x] + i) << 2) + 1] << 16) |
-                    (MEM8[((R[x] + i) << 2) + 2] << 8) |
-                    (MEM8[((R[x] + i) << 2) + 3] << 0)) |
-                   MEM32[R[x] + i];
+            R[z] = MEM32[R[x] + i];
             // Formatacao da instrucao
             sprintf(instrucao, "l32 r%u,[r%u%s%i]", z, x, (i >= 0) ? ("+") : (""), i);
             // Formatacao de saida em tela (deve mudar para o arquivo de saida)
@@ -167,10 +156,6 @@ int main(int argc, char *argv[])
             uint32_t x = (R[28] & (0b11111 << 16)) >> 16;
             int32_t i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
-            MEM8[((R[x] + i) << 2) + 0] = (R[z] >> 24) & 0xFF;
-            MEM8[((R[x] + i) << 2) + 1] = (R[z] >> 16) & 0xFF;
-            MEM8[((R[x] + i) << 2) + 2] = (R[z] >> 8) & 0xFF;
-            MEM8[((R[x] + i) << 2) + 3] = R[z] & 0xFF;
             MEM32[R[x] + i] = R[z];
 
             sprintf(instrucao, "s32 [r%u%s%i],r%u", x, (i >= 0) ? "+" : "", i, z);
@@ -517,20 +502,19 @@ int main(int argc, char *argv[])
             if (i == 0)
             {
                 R[z] = 0;
-                R[31] = SR;
             }
 
             else
             {
                 R[z] = temp_divi;
-                R[31] = SR;
             }
 
             ZN = (temp_divi == 0) ? 1 : 0;
             ZD = (temp_i == 0) ? 1 : 0;
             OV = 0;
 
-            SR = (ZN << 6) | (ZD << 5) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            SR = (ZN << 6) | (SN << 4) | (OV << 3) | (IV << 2) | (CY << 0);
+            R[31] = SR;
             sprintf(instrucao, "divi r%u,r%u,%i", z, x, i);
             fprintf(output, "0x%08X:\t%-25s\tR%u=R%u/0x%08X=0x%08X,SR=0x%08X\n", R[29], instrucao, z, x, i, R[z], R[31]);
             break;
@@ -604,15 +588,16 @@ int main(int argc, char *argv[])
         // l16
         case 0b011001:
         {
+            // TODO: Corrigir l16
             z = (R[28] & (0b11111 << 21)) >> 21;
             x = (R[28] & (0b11111 << 16)) >> 16;
             i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
 
-            R[z] = (MEM8[((R[x] + i) << 1) + 0] << 8) |
-                   (MEM8[((R[x] + i) << 1) + 1]);
+            R[z] = MEM32[(R[x] + i) >> 1];
 
             sprintf(instrucao, "l16 r%u,[r%u%s%i]", z, x, (i >= 0) ? "+" : "", i);
-            fprintf(output, "0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%04X\n", R[29], instrucao, z, (R[x] + i) << 1, R[z]);
+            // formato de saída: 0x00000084:	l16 r23,[r0+17]          	R23=MEM[0x00000022]=0x3456
+            fprintf(output, "0x%08X:\t%-25s\tR%u=MEM[0x%08X]=0x%04X\n", R[29], instrucao, z, (R[x] + i) >> 1, R[z]);
             break;
         }
 
@@ -817,17 +802,20 @@ int main(int argc, char *argv[])
         { // call
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             // uint32_t memSP = R[29] + 4;
-
             // printf("memSP: %08X\n", R[29]);
             // printf("SP: %08X\n", memSP);
             // printf("PC: %08X\n", R[30]);
-            MEM32[SP] = R[29] + 4;
-            R[30] = R[30] + 4;
-            R[29] = (int64_t)(aux << 2);
+            printf("Axss");
+            
+            MEM32[R[30]] = R[29] + 4;
+           
+            // R[30] = R[30] + 4;
+            // R[29] = (int64_t)(aux << 2);
 
             sprintf(instrucao, "call %i", aux);
-            // PC=0x00000020,MEM[0x00007FFC]=0x000002C0
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", R[30], instrucao, R[30], SP, R[30]);
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, R[29]);
+            // // PC=0x00000020,MEM[0x00007FFC]=0x000002C0
+            // fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", R[30], instrucao, R[30], SP, R[30]);
             // R[29] = R[29] + (aux << 2);
             break;
         }
@@ -941,7 +929,7 @@ int main(int argc, char *argv[])
                 z = (R[28] & (0b11111 << 21)) >> 21;
                 x = (R[28] & (0b11111 << 16)) >> 16;
                 i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
-                MEM8[R[x] + i] = R[z] & 0xFF;
+                MEM32[R[x] + i] = R[z] & 0xFF;
 
                 sprintf(instrucao, "s8 [r%u%s%i],r%u", x, (i >= 0) ? "+" : "", i, z);
                 fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]=R%u=0x%02X\n", R[29], instrucao, R[x] + i, z, R[z] & 0xFF);
@@ -954,8 +942,7 @@ int main(int argc, char *argv[])
                 z = (R[28] & (0b11111 << 21)) >> 21;
                 x = (R[28] & (0b11111 << 16)) >> 16;
                 i = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF0000 : 0x00000000);
-                MEM8[((R[x] + i) << 1) + 0] = (R[z] >> 8) & 0xFF;
-                MEM8[((R[x] + i) << 1) + 1] = R[z] & 0xFF;
+                MEM32[((R[x] + i) << 1) + 0] = (R[z] >> 8) & 0xFF;
 
                 sprintf(instrucao, "s16 [r%u%s%i],r%u", x, (i >= 0) ? "+" : "", i, z);
                 fprintf(output, "0x%08X:\t%-25s\tMEM[0x%08X]=R%u=0x%04X\n", R[29], instrucao, (R[x] + i) << 1, z, R[z] & 0xFFFF);
@@ -1245,7 +1232,6 @@ int main(int argc, char *argv[])
     fclose(input);
     fclose(output);
     // Finalizando programa
-    free(MEM8);
     free(MEM32);
     return 0;
 }
