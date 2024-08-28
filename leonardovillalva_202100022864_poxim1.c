@@ -816,16 +816,18 @@ int main(int argc, char *argv[])
         case 0b111001:
         { // call
             int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
-            uint32_t memSP = R[29] + 4;
+            // uint32_t memSP = R[29] + 4;
 
-            printf("memSP: %08X\n", R[29]);
-            printf("SP: %08X\n", memSP);
-            printf("PC: %08X\n", R[30]);
+            // printf("memSP: %08X\n", R[29]);
+            // printf("SP: %08X\n", memSP);
+            // printf("PC: %08X\n", R[30]);
+            MEM32[SP] = R[29] + 4;
+            R[30] = R[30] + 4;
+            R[29] = (int64_t)(aux << 2);
 
             sprintf(instrucao, "call %i", aux);
             // PC=0x00000020,MEM[0x00007FFC]=0x000002C0
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", R[29], instrucao, R[29] + 4 + (aux << 2), R[30], memSP);
-
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", R[30], instrucao, R[30], SP, R[30]);
             // R[29] = R[29] + (aux << 2);
             break;
         }
@@ -833,16 +835,16 @@ int main(int argc, char *argv[])
         case 0b011111:
         {
             // ret
-            SP = SP + 4;
-            uint32_t pc_low = MEM8[SP];
-            uint32_t pc_byte1 = MEM8[SP + 1];
-            uint32_t pc_byte2 = MEM8[SP + 2];
-            uint32_t pc_high = MEM8[SP + 3];
+            // SP = SP + 4;
+            // uint32_t pc_low = MEM8[SP];
+            // uint32_t pc_byte1 = MEM8[SP + 1];
+            // uint32_t pc_byte2 = MEM8[SP + 2];
+            // uint32_t pc_high = MEM8[SP + 3];
 
-            PC = (pc_high << 24) | (pc_byte2 << 16) | (pc_byte1 << 8) | pc_low;
-            sprintf(instrucao, "ret");
-            fprintf(output, "0x%08X:\t%-25s\tPC=MEM[0x%08X]=0x%08X\n", R[29], instrucao, SP, PC);
-            break;
+            // PC = (pc_high << 24) | (pc_byte2 << 16) | (pc_byte1 << 8) | pc_low;
+            // sprintf(instrucao, "ret");
+            // fprintf(output, "0x%08X:\t%-25s\tPC=MEM[0x%08X]=0x%08X\n", R[29], instrucao, SP, PC);
+            // break;
         }
 
         case 0b001010:
