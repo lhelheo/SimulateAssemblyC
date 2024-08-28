@@ -789,18 +789,16 @@ int main(int argc, char *argv[])
 
         case 0b111001:
         { // call
-            // aux pega os primeiros 26 bits e recebe o bit mais significativo até 32 bits
-            int32_t aux = (R[28] & 0x3FFFFFF) | ((R[28] & 0x2000000) ? 0xFC000000 : 0x00000000);
+            int32_t aux = (R[28] & 0x03FFFFFF) | ((R[28] & 0x02000000) ? 0xFC000000 : 0x00000000);
             uint32_t memSP = R[29] + 4;
-            // uint64_t testing = R[29] + 4 + (aux << 2);
-            // R[29] = testing;
-            printf("PC = 0x%08X\n", R[29]);
-            printf("SP = 0x%08X\n", memSP);
-            printf("MEM[0x%08X]\n", R[30]);
+
+            printf("memSP: %08X\n", R[29]);
+            printf("SP: %08X\n", memSP);
+            printf("PC: %08X\n", R[30]);
 
             sprintf(instrucao, "call %i", aux);
-            fprintf(output, "0x%08X:\t%-25s\tPC=MEM[0x%08X]=0x%08X\n", R[29], instrucao, R[30], R[29]);
-
+            // PC=0x00000020,MEM[0x00007FFC]=0x000002C0
+            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X,MEM[0x%08X]=0x%08X\n", R[29], instrucao, R[29] + 4 + (aux << 2), R[30], memSP);
             break;
         }
 
