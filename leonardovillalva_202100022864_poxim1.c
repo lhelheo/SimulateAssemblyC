@@ -772,24 +772,35 @@ int main(int argc, char *argv[])
         case 0b011110:
         {
             // call
-            uint32_t aux15 = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
-            MEM8[SP] = (PC + 4) & 0xFF;
-            MEM8[SP + 1] = ((PC + 4) >> 8) & 0xFF;
-            MEM8[SP + 2] = ((PC + 4) >> 16) & 0xFF;
-            MEM8[SP + 3] = ((PC + 4) >> 24) & 0xFF;
-            MEM32[SP] = PC + 4;
+            // uint32_t aux15 = (R[28] & 0xFFFF) | ((R[28] & 0x8000) ? 0xFFFF8000 : 0x00000000);
+            // MEM8[SP] = (PC + 4) & 0xFF;
+            // MEM8[SP + 1] = ((PC + 4) >> 8) & 0xFF;
+            // MEM8[SP + 2] = ((PC + 4) >> 16) & 0xFF;
+            // MEM8[SP + 3] = ((PC + 4) >> 24) & 0xFF;
+            // MEM32[SP] = PC + 4;
 
-            // SP = SP - 4
-            SP = SP - 4;
-            PC = (R[x] + aux15) << 2;
-            sprintf(instrucao, "callDIFERENTE [r%u+%i]", x, aux15);
-            fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, PC);
-            break;
+            // // SP = SP - 4
+            // SP = SP - 4;
+            // PC = (R[x] + aux15) << 2;
+            // sprintf(instrucao, "callDIFERENTE [r%u+%i]", x, aux15);
+            // fprintf(output, "0x%08X:\t%-25s\tPC=0x%08X\n", R[29], instrucao, PC);
+            // break;
         }
 
         case 0b111001:
         { // call
-            printf("teste");
+            // aux pega os primeiros 26 bits e recebe o bit mais significativo até 32 bits
+            int32_t aux = (R[28] & 0x3FFFFFF) | ((R[28] & 0x2000000) ? 0xFC000000 : 0x00000000);
+            uint32_t memSP = R[29] + 4;
+            // uint64_t testing = R[29] + 4 + (aux << 2);
+            // R[29] = testing;
+            printf("PC = 0x%08X\n", R[29]);
+            printf("SP = 0x%08X\n", memSP);
+            printf("MEM[0x%08X]\n", R[30]);
+
+            sprintf(instrucao, "call %i", aux);
+            fprintf(output, "0x%08X:\t%-25s\tPC=MEM[0x%08X]=0x%08X\n", R[29], instrucao, R[30], R[29]);
+
             break;
         }
 
